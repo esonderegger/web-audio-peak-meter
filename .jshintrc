@@ -1,0 +1,9 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "undef": true,
+  "globals": {
+    "module": true,
+    "document": true
+  }
+}
