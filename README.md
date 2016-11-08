@@ -47,7 +47,7 @@ Finally, use as you would in the above example:
 
     var myMeterElement = document.getElementById('my-peak-meter');
     var myAudio = document.getElementById('my-audio');
-    var audioCtx = new window.AudioContext();
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     var sourceNode = audioCtx.createMediaElementSource(myAudio);
     sourceNode.connect(audioCtx.destination);
     var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
