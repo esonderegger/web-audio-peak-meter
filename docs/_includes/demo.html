@@ -1,0 +1,17 @@
+<div>
+  <div id="my-peak-meter" style="width: 5em; height: 20em; margin: 1em 0;">
+  </div>
+  <audio id="my-audio" preload="metadata" controls="controls">
+    <source src="audio/marines_hymn.mp3" type="audio/mpeg">
+  </audio>
+  <script src="https://assets.rpy.xyz/web-audio-peak-meter.min.js"></script>
+  <script>
+    var myMeterElement = document.getElementById('my-peak-meter');
+    var myAudio = document.getElementById('my-audio');
+    var audioCtx = new window.AudioContext();
+    var sourceNode = audioCtx.createMediaElementSource(myAudio);
+    sourceNode.connect(audioCtx.destination);
+    var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
+    webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+  </script>
+</div>
