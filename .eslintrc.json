@@ -1,0 +1,17 @@
+{
+    "extends": "google",
+    "installedESLint": true,
+    "parserOptions": {
+        "ecmaVersion": 5,
+        "sourceType": "script"
+    },
+    "rules": {
+        "semi": "error",
+        "require-jsdoc": "off"
+    },
+    "plugins": [
+    ],
+    "env": {
+        "browser": true
+    }
+}
