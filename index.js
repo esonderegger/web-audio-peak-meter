@@ -8,7 +8,7 @@ var webAudioPeakMeter = (function() {
     gradient: ['red 1%', '#ff0 16%', 'lime 45%', '#080 100%'],
     dbRange: 48,
     dbTickSize: 6,
-    maskTransition: 'height 0.1s'
+    maskTransition: 'height 0.1s',
   };
   var tickWidth;
   var elementWidth;
@@ -32,7 +32,9 @@ var webAudioPeakMeter = (function() {
 
   var setOptions = function(userOptions) {
     for (var k in userOptions) {
-      options[k] = userOptions[k];
+      if(userOptions.hasOwnProperty(k)) {
+        options[k] = userOptions[k];
+      }
     }
     tickWidth = options.fontSize * 2.0;
     meterTop = options.fontSize * 1.5 + options.borderSize;
@@ -158,7 +160,7 @@ var webAudioPeakMeter = (function() {
       return meterHeight;
     } else {
       var d = options.dbRange * -1;
-      var returnVal =  Math.floor(dbFromFloat(floatVal) * meterHeight / d);
+      var returnVal = Math.floor(dbFromFloat(floatVal) * meterHeight / d);
       if (returnVal > meterHeight) {
         return meterHeight;
       } else {
@@ -196,7 +198,7 @@ var webAudioPeakMeter = (function() {
 
   return {
     createMeterNode: createMeterNode,
-    createMeter: createMeter
+    createMeter: createMeter,
   };
 })();
 
