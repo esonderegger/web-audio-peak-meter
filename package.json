@@ -26,6 +26,7 @@
   "homepage": "https://github.com/esonderegger/web-audio-peak-meter#readme",
   "devDependencies": {
     "eslint": "^3.9.1",
+    "eslint-config-google": "^0.7.0",
     "uglify-js": "^2.7.4"
   }
 }
