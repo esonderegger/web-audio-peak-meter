@@ -156,13 +156,14 @@ var webAudioPeakMeter = (function() {
   };
 
   var maskSize = function(floatVal) {
+    var meterDimension = vertical ? meterHeight : meterWidth;
     if (floatVal === 0.0) {
-      return meterHeight;
+      return meterDimension;
     } else {
       var d = options.dbRange * -1;
-      var returnVal = Math.floor(dbFromFloat(floatVal) * meterHeight / d);
-      if (returnVal > meterHeight) {
-        return meterHeight;
+      var returnVal = Math.floor(dbFromFloat(floatVal) * meterDimension / d);
+      if (returnVal > meterDimension) {
+        return meterDimension;
       } else {
         return returnVal;
       }
@@ -187,7 +188,11 @@ var webAudioPeakMeter = (function() {
     }
     for (i = 0; i < channelCount; i++) {
       var thisMaskSize = maskSize(channelMaxes[i], meterHeight);
-      channelMasks[i].style.height = thisMaskSize + 'px';
+      if (vertical) {
+        channelMasks[i].style.height = thisMaskSize + 'px';
+      } else {
+        channelMasks[i].style.width = thisMaskSize + 'px';
+      }
       if (channelMaxes[i] > channelPeaks[i]) {
         channelPeaks[i] = channelMaxes[i];
         var labelText = dbFromFloat(channelPeaks[i]).toFixed(1);
