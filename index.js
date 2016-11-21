@@ -21,6 +21,8 @@ var webAudioPeakMeter = (function() {
   var channelMasks = [];
   var channelPeaks = [];
   var channelPeakLabels = [];
+  var maskSizes = [];
+  var textLabels = [];
 
   var getBaseLog = function(x, y) {
     return Math.log(y) / Math.log(x);
@@ -84,14 +86,17 @@ var webAudioPeakMeter = (function() {
       channelPeakLabels[i] = createPeakLabel(meterElement, channelWidth,
                                              channelLeft);
       channelLeft += channelWidth;
+      maskSizes[i] = 0;
+      textLabels[i] = '-∞';
     }
     meterNode.onaudioprocess = updateMeter;
     meterElement.addEventListener('click', function() {
       for (var i = 0; i < channelCount; i++) {
         channelPeaks[i] = 0.0;
-        channelPeakLabels[i].textContent = '-∞';
+        textLabels[i] = '-∞';
       }
     }, false);
+    paintMeter();
   };
 
   var createTicks = function(parent) {
@@ -187,18 +192,24 @@ var webAudioPeakMeter = (function() {
       }
     }
     for (i = 0; i < channelCount; i++) {
-      var thisMaskSize = maskSize(channelMaxes[i], meterHeight);
-      if (vertical) {
-        channelMasks[i].style.height = thisMaskSize + 'px';
-      } else {
-        channelMasks[i].style.width = thisMaskSize + 'px';
-      }
+      maskSizes[i] = maskSize(channelMaxes[i], meterHeight);
       if (channelMaxes[i] > channelPeaks[i]) {
         channelPeaks[i] = channelMaxes[i];
-        var labelText = dbFromFloat(channelPeaks[i]).toFixed(1);
-        channelPeakLabels[i].textContent = labelText;
+        textLabels[i] = dbFromFloat(channelPeaks[i]).toFixed(1);
       }
     }
+  };
+
+  var paintMeter = function() {
+    for (var i = 0; i < channelCount; i++) {
+      if (vertical) {
+        channelMasks[i].style.height = maskSizes[i] + 'px';
+      } else {
+        channelMasks[i].style.width = maskSizes[i] + 'px';
+      }
+      channelPeakLabels[i].textContent = textLabels[i];
+    }
+    window.requestAnimationFrame(paintMeter);
   };
 
   return {
