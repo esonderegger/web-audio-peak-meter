@@ -1,5 +1,5 @@
 var fs = require('fs');
-var UglifyJS = require("uglify-js");
+var UglifyJS = require('uglify-js');
 
 var jsFile = fs.readFileSync('index.js', 'utf8');
 

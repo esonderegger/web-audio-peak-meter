@@ -6,6 +6,7 @@
         "sourceType": "script"
     },
     "rules": {
+        "no-var": "off",
         "semi": "error",
         "require-jsdoc": "off"
     },
