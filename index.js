@@ -8,7 +8,7 @@ var webAudioPeakMeter = (function() {
     gradient: ['red 1%', '#ff0 16%', 'lime 45%', '#080 100%'],
     dbRange: 48,
     dbTickSize: 6,
-    maskTransition: 'height 0.1s',
+    maskTransition: '0.1s',
   };
   var tickWidth;
   var elementWidth;
@@ -75,7 +75,13 @@ var webAudioPeakMeter = (function() {
                   meterTop, tickWidth);
     channelCount = meterNode.channelCount;
     var channelWidth = meterWidth / channelCount;
+    if (!vertical) {
+      channelWidth = meterHeight / channelCount;
+    }
     var channelLeft = tickWidth;
+    if (!vertical) {
+      channelLeft = meterTop;
+    }
     for (var i = 0; i < channelCount; i++) {
       createChannelMask(meterElement, options.borderSize,
                         meterTop, channelLeft, false);
@@ -102,19 +108,37 @@ var webAudioPeakMeter = (function() {
   var createTicks = function(parent) {
     var numTicks = Math.floor(options.dbRange / options.dbTickSize);
     var dbTickLabel = 0;
-    var dbTickTop = options.fontSize + options.borderSize;
-    for (var i = 0; i < numTicks; i++) {
-      var dbTick = document.createElement('div');
-      parent.appendChild(dbTick);
-      dbTick.style.width = tickWidth + 'px';
-      dbTick.style.textAlign = 'right';
-      dbTick.style.color = options.tickColor;
-      dbTick.style.fontSize = options.fontSize + 'px';
-      dbTick.style.position = 'absolute';
-      dbTick.style.top = dbTickTop + 'px';
-      dbTick.textContent = dbTickLabel + '';
-      dbTickLabel -= options.dbTickSize;
-      dbTickTop += meterHeight / numTicks;
+    if (vertical) {
+      var dbTickTop = options.fontSize + options.borderSize;
+      for (var i = 0; i < numTicks; i++) {
+        var dbTick = document.createElement('div');
+        parent.appendChild(dbTick);
+        dbTick.style.width = tickWidth + 'px';
+        dbTick.style.textAlign = 'right';
+        dbTick.style.color = options.tickColor;
+        dbTick.style.fontSize = options.fontSize + 'px';
+        dbTick.style.position = 'absolute';
+        dbTick.style.top = dbTickTop + 'px';
+        dbTick.textContent = dbTickLabel + '';
+        dbTickLabel -= options.dbTickSize;
+        dbTickTop += meterHeight / numTicks;
+      }
+    } else {
+      tickWidth = meterWidth / numTicks;
+      var dbTickRight = options.fontSize * 2;
+      for (var i = 0; i < numTicks; i++) {
+        var dbTick = document.createElement('div');
+        parent.appendChild(dbTick);
+        dbTick.style.width = tickWidth + 'px';
+        dbTick.style.textAlign = 'right';
+        dbTick.style.color = options.tickColor;
+        dbTick.style.fontSize = options.fontSize + 'px';
+        dbTick.style.position = 'absolute';
+        dbTick.style.right = dbTickRight + 'px';
+        dbTick.textContent = dbTickLabel + '';
+        dbTickLabel -= options.dbTickSize;
+        dbTickRight += tickWidth;
+      }
     }
   };
 
@@ -125,8 +149,15 @@ var webAudioPeakMeter = (function() {
     rainbow.style.height = height + 'px';
     rainbow.style.position = 'absolute';
     rainbow.style.top = top + 'px';
-    rainbow.style.left = left + 'px';
-    var gradientStyle = 'linear-gradient(' + options.gradient.join(', ') + ')';
+    if (vertical) {
+      rainbow.style.left = left + 'px';
+      var gradientStyle = 'linear-gradient(to bottom, ' +
+        options.gradient.join(', ') + ')';
+    } else {
+      rainbow.style.left = options.borderSize + 'px';
+      var gradientStyle = 'linear-gradient(to left, ' +
+        options.gradient.join(', ') + ')';
+    }
     rainbow.style.backgroundImage = gradientStyle;
     return rainbow;
   };
@@ -134,28 +165,45 @@ var webAudioPeakMeter = (function() {
   var createPeakLabel = function(parent, width, left) {
     var label = document.createElement('div');
     parent.appendChild(label);
-    label.style.width = width + 'px';
     label.style.textAlign = 'center';
     label.style.color = options.tickColor;
     label.style.fontSize = options.fontSize + 'px';
     label.style.position = 'absolute';
-    label.style.top = options.borderSize + 'px';
-    label.style.left = left + 'px';
     label.textContent = '-∞';
+    if (vertical) {
+      label.style.width = width + 'px';
+      label.style.top = options.borderSize + 'px';
+      label.style.left = left + 'px';
+    } else {
+      label.style.width = options.fontSize * 2 + 'px';
+      label.style.right = options.borderSize + 'px';
+      label.style.top = (width * 0.25) + left + 'px';
+    }
     return label;
   };
 
   var createChannelMask = function(parent, width, top, left, transition) {
     var channelMask = document.createElement('div');
     parent.appendChild(channelMask);
-    channelMask.style.width = width + 'px';
-    channelMask.style.height = meterHeight + 'px';
     channelMask.style.position = 'absolute';
-    channelMask.style.top = top + 'px';
-    channelMask.style.left = left + 'px';
+    if (vertical) {
+      channelMask.style.width = width + 'px';
+      channelMask.style.height = meterHeight + 'px';
+      channelMask.style.top = top + 'px';
+      channelMask.style.left = left + 'px';
+    } else {
+      channelMask.style.width = meterWidth + 'px';
+      channelMask.style.height = width + 'px';
+      channelMask.style.top = left + 'px';
+      channelMask.style.right = options.fontSize * 2 + 'px';
+    }
     channelMask.style.backgroundColor = options.backgroundColor;
     if (transition) {
-      channelMask.style.transition = options.maskTransition;
+      if (vertical) {
+        channelMask.style.transition = 'height ' + options.maskTransition;
+      } else {
+        channelMask.style.transition = 'width ' + options.maskTransition;
+      }
     }
     return channelMask;
   };
