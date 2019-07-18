@@ -13,5 +13,8 @@
     sourceNode.connect(audioCtx.destination);
     var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
     webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+    myAudio.addEventListener('play', function() {
+      audioCtx.resume();
+    });
   </script>
 </div>
