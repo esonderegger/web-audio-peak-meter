@@ -18,6 +18,8 @@ To use these meters, first create a `<div>` with a width and height and an `<aud
 
 Then, at the bottom of your `<body>` tag, add the script tag for these meters. Next, create an `AudioContext` if you don't have one already and create an [AudioNode](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode) from the `<audio>` element, connecting it to the destination node. Finally, create a meter node and call the `createMeter` function, passing in the Element object, the meter node, and an optional object for configuration options, like so:
 
+Note: for this to work in Google Chrome, we have to resume the audio context after a user gesture ([more info](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio)). Adding a listener to the audio element's `play` event is one way to do this.
+
     <script src="https://assets.rpy.xyz/web-audio-peak-meter.min.js"></script>
     <script>
       var myMeterElement = document.getElementById('my-peak-meter');
@@ -27,6 +29,9 @@ Then, at the bottom of your `<body>` tag, add the script tag for these meters. N
       sourceNode.connect(audioCtx.destination);
       var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
       webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+      myAudio.addEventListener('play', function() {
+        audioCtx.resume();
+      });
     </script>
 
 In this example we used an HTML5 audio element, but these meters can work with any web audio API source node. This example was just meant to show the simplest possible use case. If you are already familiar with the web audio API adapting this example to your needs should be fairly self-explanatory, but please reach out if anything isn't working or doesn't make sense.
@@ -52,6 +57,9 @@ Finally, use as you would in the above example:
     sourceNode.connect(audioCtx.destination);
     var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
     webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+    myAudio.addEventListener('play', function() {
+      audioCtx.resume();
+    });
 
 (Note: the markup remains the same as in the basic example)
 
