@@ -5,6 +5,7 @@ var webAudioPeakMeter = (function() {
     fontSize: 9,
     backgroundColor: 'black',
     tickColor: '#ddd',
+    labelColor: '#ddd',
     gradient: ['red 1%', '#ff0 16%', 'lime 45%', '#080 100%'],
     dbRange: 48,
     dbTickSize: 6,
@@ -166,7 +167,7 @@ var webAudioPeakMeter = (function() {
     var label = document.createElement('div');
     parent.appendChild(label);
     label.style.textAlign = 'center';
-    label.style.color = options.tickColor;
+    label.style.color = options.labelColor;
     label.style.fontSize = options.fontSize + 'px';
     label.style.position = 'absolute';
     label.textContent = '-∞';
