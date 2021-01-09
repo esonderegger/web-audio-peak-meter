@@ -50,7 +50,7 @@ var webAudioPeakMeter = (function() {
     }
     tickWidth = options.fontSize * 2.0;
     meterTop = options.fontSize * 1.5 + options.borderSize;
-  }
+  };
 
   var createMeterNode = function(sourceNode, audioCtx) {
     var c = sourceNode.channelCount;
@@ -67,7 +67,7 @@ var webAudioPeakMeter = (function() {
     return [256, 512, 1024, 2048, 4096, 8192, 16384].reduce((a, b) => {
       return Math.abs(b - numSamplesIn) < Math.abs(a - numSamplesIn) ? b : a;
     });
-  }
+  };
 
   var createContainerDiv = function(parent) {
     var meterElement = document.createElement('div');
@@ -280,7 +280,7 @@ var webAudioPeakMeter = (function() {
         }
     }
     return channelMaxes;
-  }
+  };
 
   var calculateTPValues = function (inputBuffer) {
     var channelCount = inputBuffer.numberOfChannels;
@@ -308,7 +308,7 @@ var webAudioPeakMeter = (function() {
       }
     }
     return lastChannelTP;
-  }
+  };
 
   var audioOverSampleAndFilter = function (channelData, inputFs) {
     var res = [];
@@ -328,7 +328,7 @@ var webAudioPeakMeter = (function() {
       res = res.concat(samplesOut);
     }
     return res;
-  }
+  };
 
   var calculateLPFCoefficients = function (numCoefficients) {
     var retCoefs = [];
@@ -351,7 +351,7 @@ var webAudioPeakMeter = (function() {
       hn = (wn * hn) * upsampleFactor;				
   
       retCoefs.push(hn);
-    }
+    };
 
     return retCoefs;
   }
@@ -364,7 +364,7 @@ var webAudioPeakMeter = (function() {
     }
 
     return ret;
-  }
+  };
 
   var filterSample = function (sample) {
     var ret = [];
@@ -384,7 +384,7 @@ var webAudioPeakMeter = (function() {
       ret.push(retVal);
     }
     return ret;
-  }
+  };
 
   var paintMeter = function() {
     for (var i = 0; i < channelCount; i++) {
