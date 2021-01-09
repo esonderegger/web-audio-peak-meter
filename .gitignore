@@ -34,4 +34,6 @@ node_modules
 
 # Compiled files in docs folder
 docs/_site
-docs/web-audio-peak-meter.min.js
+
+# Package lock
+package-lock.json
