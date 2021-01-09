@@ -1,6 +1,6 @@
 # Web Audio Peak Meters
 
-Customizable peak meters, using the web audio API.
+Customizable peak meters, using the web audio API. It can measure peak or true peak based on ITU-R BS.1770
 
 ## Demo
 
