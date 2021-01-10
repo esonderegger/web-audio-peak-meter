@@ -255,7 +255,6 @@ var webAudioPeakMeter = (function() {
       // Just get the peak level
       channelMaxes = calculateMaxValues(inputBuffer);
     }
-
     // Update peak & text values
     for (var i = 0; i < channelCount; i++) {
       maskSizes[i] = maskSize(channelMaxes[i], meterHeight);
@@ -288,12 +287,10 @@ var webAudioPeakMeter = (function() {
     if (lastChannelTP.length <= 0) {
       console.log('Initialing TP values for ' + channelCount + 'channels');
       lastChannelTP = createAndIniArray(channelCount, 0.0);
-
-	    // Decay time ms = 1700 and -20Db
-	    var attFactor = Math.pow (10.0, -20/10.0);
-	    var decayTimeS = 1700 / 1000;
+      // Decay time ms = 1700 and -20Db
+      var attFactor = Math.pow (10.0, -20/10.0);
+      var decayTimeS = 1700 / 1000;
       decayFactor = Math.pow(attFactor, 1.0/(inputBuffer.sampleRate * decayTimeS));
-      
       console.log('Initialized with decayFactor ' + decayFactor);
     }
     for (var c = 0; c < channelCount; c++) {
@@ -320,7 +317,6 @@ var webAudioPeakMeter = (function() {
       }
       lpfCoefficients = calculateLPFCoefficients(33);
       lpfBuffer = createAndIniArray(lpfCoefficients.length, 0.0);
-
       console.log('Initialized lpfCoefficients lpfCoefficients=[' + lpfCoefficients.join(',') + '], and lpfBuffer: [' + lpfBuffer.join(',') + ']');
     }
     for (var ni = 0; ni < channelData.length; ni++) {
@@ -333,11 +329,8 @@ var webAudioPeakMeter = (function() {
   var calculateLPFCoefficients = function (numCoefficients) {
     var retCoefs = [];
     var fcRel = 1.0 / (4.0 * upsampleFactor);
-  
     var coefsLim = Math.floor((numCoefficients - 1) / 2);
-  
-    for (var n = -coefsLim; n <= coefsLim; n++)
-    {
+    for (var n = -coefsLim; n <= coefsLim; n++) {
       var wn = 0.54 + 0.46 * Math.cos(2.0 * Math.PI * n / numCoefficients);
       var hn = 0.0;
       if (n == 0) {
@@ -346,29 +339,23 @@ var webAudioPeakMeter = (function() {
       else {
         hn = Math.sin(2.0 * Math.PI * fcRel * n) / (Math.PI * n);
       }
-      
       //Adapt windows & upsampler factor
-      hn = (wn * hn) * upsampleFactor;				
-  
+      hn = (wn * hn) * upsampleFactor;
       retCoefs.push(hn);
     };
-
     return retCoefs;
   }
 
   var createAndIniArray = function (numElements, iniVal) {
     var ret = [];
-
     for (var n = 0; n < numElements; n++) {
       ret[n] = iniVal;
     }
-
     return ret;
   };
 
   var filterSample = function (sample) {
     var ret = [];
-    
     lpfBuffer.push(sample);
     if (lpfBuffer.length >= lpfCoefficients.length) {
       lpfBuffer.shift();
@@ -379,7 +366,7 @@ var webAudioPeakMeter = (function() {
       var retVal = 0;
       for (var nc = nA; nc < lpfCoefficients.length; nc = nc + upsampleFactor) {
         retVal = retVal + (lpfCoefficients[nc] * lpfBuffer[lpfBuffer.length - 1 -nT]);
-        nT++;			
+        nT++;
       }
       ret.push(retVal);
     }
