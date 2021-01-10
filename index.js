@@ -10,6 +10,7 @@ var webAudioPeakMeter = (function() {
     dbRange: 48,
     dbTickSize: 6,
     maskTransition: '0.1s',
+    audioMeterStandard: 'peak-sample' // Could be "true-peak" (ITU-R BS.1770) or "peak-sample"
   };
   var tickWidth;
   var elementWidth;
@@ -24,6 +25,14 @@ var webAudioPeakMeter = (function() {
   var channelPeakLabels = [];
   var maskSizes = [];
   var textLabels = [];
+  var refreshEveryApproxMs = 20;
+
+  // Used for ITU-R BS.1770
+  var lpfCoefficients = [];
+  var lpfBuffer = [];
+  var upsampleFactor = 4;
+  var lastChannelTP = [];
+  var decayFactor = 0.99999;
 
   var getBaseLog = function(x, y) {
     return Math.log(y) / Math.log(x);
@@ -45,10 +54,19 @@ var webAudioPeakMeter = (function() {
 
   var createMeterNode = function(sourceNode, audioCtx) {
     var c = sourceNode.channelCount;
-    var meterNode = audioCtx.createScriptProcessor(2048, c, c);
-    sourceNode.connect(meterNode);
-    meterNode.connect(audioCtx.destination);
+    
+    // Calculate refresh interval 
+    var resfreshIntervalSamples = (refreshEveryApproxMs/1000 * sourceNode.sampleRate) * sourceNode.channelCount;
+
+    var meterNode = audioCtx.createScriptProcessor(findAudioProcBufferSize(resfreshIntervalSamples), c, c);
+    sourceNode.connect(meterNode).connect(audioCtx.destination);
     return meterNode;
+  };
+
+  var findAudioProcBufferSize = function (numSamplesIn) {
+    return [256, 512, 1024, 2048, 4096, 8192, 16384].reduce((a, b) => {
+      return Math.abs(b - numSamplesIn) < Math.abs(a - numSamplesIn) ? b : a;
+    });
   };
 
   var createContainerDiv = function(parent) {
@@ -226,27 +244,133 @@ var webAudioPeakMeter = (function() {
 
   var updateMeter = function(audioProcessingEvent) {
     var inputBuffer = audioProcessingEvent.inputBuffer;
-    var i;
-    var channelData = [];
     var channelMaxes = [];
-    for (i = 0; i < channelCount; i++) {
-      channelData[i] = inputBuffer.getChannelData(i);
-      channelMaxes[i] = 0.0;
+    
+    // Calculate peak levels
+    if (options.audioMeterStandard == 'true-peak') {
+      // This follows ITU-R BS.1770 (True Peak meter)
+      channelMaxes = calculateTPValues(inputBuffer);
     }
-    for (var sample = 0; sample < inputBuffer.length; sample++) {
-      for (i = 0; i < channelCount; i++) {
-        if (Math.abs(channelData[i][sample]) > channelMaxes[i]) {
-          channelMaxes[i] = Math.abs(channelData[i][sample]);
-        }
-      }
+    else {
+      // Just get the peak level
+      channelMaxes = calculateMaxValues(inputBuffer);
     }
-    for (i = 0; i < channelCount; i++) {
+    // Update peak & text values
+    for (var i = 0; i < channelCount; i++) {
       maskSizes[i] = maskSize(channelMaxes[i], meterHeight);
       if (channelMaxes[i] > channelPeaks[i]) {
         channelPeaks[i] = channelMaxes[i];
         textLabels[i] = dbFromFloat(channelPeaks[i]).toFixed(1);
       }
     }
+  };
+
+  var calculateMaxValues = function (inputBuffer) {
+    var channelMaxes = [];
+    var channelCount = inputBuffer.numberOfChannels;
+    
+    for (var c = 0; c < channelCount; c++) {
+      channelMaxes[c] = 0.0;
+      var channelData = inputBuffer.getChannelData(c);
+      for (var s = 0; s < channelData.length; s++) {
+          if (Math.abs(channelData[s]) > channelMaxes[c]) {
+            channelMaxes[c] = Math.abs(channelData[s]);
+          }
+        }
+    }
+    return channelMaxes;
+  };
+
+  var calculateTPValues = function (inputBuffer) {
+    var channelCount = inputBuffer.numberOfChannels;
+    // Ini TP values
+    if (lastChannelTP.length <= 0) {
+      console.log('Initialing TP values for ' + channelCount + 'channels');
+      lastChannelTP = createAndIniArray(channelCount, 0.0);
+      // Decay time ms = 1700 and -20Db
+      var attFactor = Math.pow (10.0, -20/10.0);
+      var decayTimeS = 1700 / 1000;
+      decayFactor = Math.pow(attFactor, 1.0/(inputBuffer.sampleRate * decayTimeS));
+      console.log('Initialized with decayFactor ' + decayFactor);
+    }
+    for (var c = 0; c < channelCount; c++) {
+      var channelData = inputBuffer.getChannelData(c);
+      // Process according to ITU-R BS.1770
+      var overSampledAndLPF = audioOverSampleAndFilter(channelData, inputBuffer.sampleRate);
+      for (var s = 0; s < overSampledAndLPF.length; s++) {
+        lastChannelTP[c] = lastChannelTP[c] * decayFactor;
+        if (Math.abs(overSampledAndLPF[s]) > lastChannelTP[c]) {
+          lastChannelTP[c] = Math.abs(overSampledAndLPF[s]);
+        }
+      }
+    }
+    return lastChannelTP;
+  };
+
+  var audioOverSampleAndFilter = function (channelData, inputFs) {
+    var res = [];
+    // Initialize filter coefficients and buffer
+    if (lpfCoefficients.length <= 0) {
+      console.log('Initialing filter components for ITU-R BS.1770, fs: ' + inputFs);
+      if (inputFs >= 96000) {
+        upsampleFactor = 2;
+      }
+      lpfCoefficients = calculateLPFCoefficients(33);
+      lpfBuffer = createAndIniArray(lpfCoefficients.length, 0.0);
+      console.log('Initialized lpfCoefficients lpfCoefficients=[' + lpfCoefficients.join(',') + '], and lpfBuffer: [' + lpfBuffer.join(',') + ']');
+    }
+    for (var ni = 0; ni < channelData.length; ni++) {
+      var samplesOut = filterSample(channelData[ni]); // 1 input sample -> generated upsampleFactor samples
+      res = res.concat(samplesOut);
+    }
+    return res;
+  };
+
+  var calculateLPFCoefficients = function (numCoefficients) {
+    var retCoefs = [];
+    var fcRel = 1.0 / (4.0 * upsampleFactor);
+    var coefsLim = Math.floor((numCoefficients - 1) / 2);
+    for (var n = -coefsLim; n <= coefsLim; n++) {
+      var wn = 0.54 + 0.46 * Math.cos(2.0 * Math.PI * n / numCoefficients);
+      var hn = 0.0;
+      if (n == 0) {
+        hn = 2.0 * fcRel;
+      }
+      else {
+        hn = Math.sin(2.0 * Math.PI * fcRel * n) / (Math.PI * n);
+      }
+      //Adapt windows & upsampler factor
+      hn = (wn * hn) * upsampleFactor;
+      retCoefs.push(hn);
+    };
+    return retCoefs;
+  }
+
+  var createAndIniArray = function (numElements, iniVal) {
+    var ret = [];
+    for (var n = 0; n < numElements; n++) {
+      ret[n] = iniVal;
+    }
+    return ret;
+  };
+
+  var filterSample = function (sample) {
+    var ret = [];
+    lpfBuffer.push(sample);
+    if (lpfBuffer.length >= lpfCoefficients.length) {
+      lpfBuffer.shift();
+    }
+    
+    for (var nA = 0; nA < upsampleFactor; nA++)	{
+      var nT = 0;
+      var retVal = 0;
+      for (var nc = nA; nc < lpfCoefficients.length; nc = nc + upsampleFactor) {
+        retVal = retVal + (lpfCoefficients[nc] * lpfBuffer[lpfBuffer.length - 1 -nT]);
+        nT++;
+      }
+      ret.push(retVal);
+    }
+    return ret;
   };
 
   var paintMeter = function() {

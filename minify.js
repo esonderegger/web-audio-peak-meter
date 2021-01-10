@@ -7,6 +7,8 @@ var splitLines = jsFile.split('\n');
 var slicedLines = splitLines.slice(0, -2);
 var joinedLines = slicedLines.join('\n');
 
-var uglified = UglifyJS.minify(joinedLines, {fromString: true});
+var uglified = UglifyJS.minify(joinedLines);
 
 fs.writeFileSync('docs/web-audio-peak-meter.min.js', uglified.code);
+
+return;

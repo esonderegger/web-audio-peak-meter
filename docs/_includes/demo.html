@@ -4,7 +4,7 @@
   <audio id="my-audio" preload="metadata" controls="controls">
     <source src="audio/marines_hymn.mp3" type="audio/mpeg">
   </audio>
-  <script src="https://assets.rpy.xyz/web-audio-peak-meter.min.js"></script>
+  <script src="web-audio-peak-meter.min.js"></script>
   <script>
     var myMeterElement = document.getElementById('my-peak-meter');
     var myAudio = document.getElementById('my-audio');
@@ -12,7 +12,7 @@
     var sourceNode = audioCtx.createMediaElementSource(myAudio);
     sourceNode.connect(audioCtx.destination);
     var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
-    webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+    webAudioPeakMeter.createMeter(myMeterElement, meterNode, {audioMeterStandard: 'true-peak'});
     myAudio.addEventListener('play', function() {
       audioCtx.resume();
     });
