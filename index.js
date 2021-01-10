@@ -10,7 +10,7 @@ var webAudioPeakMeter = (function() {
     dbRange: 48,
     dbTickSize: 6,
     maskTransition: '0.1s',
-    audioMeterStandard: '1770' // Could be 1770 (ITU-R BS.1770) or none
+    audioMeterStandard: 'peak-sample' // Could be "true-peak" (ITU-R BS.1770) or "peak-sample"
   };
   var tickWidth;
   var elementWidth;
@@ -247,7 +247,7 @@ var webAudioPeakMeter = (function() {
     var channelMaxes = [];
     
     // Calculate peak levels
-    if (options.audioMeterStandard == '1770') {
+    if (options.audioMeterStandard == 'true-peak') {
       // This follows ITU-R BS.1770 (True Peak meter)
       channelMaxes = calculateTPValues(inputBuffer);
     }
