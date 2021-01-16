@@ -35,5 +35,5 @@ node_modules
 # Compiled files in docs folder
 docs/_site
 
-# Package lock
-package-lock.json
+# vscode workspace
+workspace.code-workspace

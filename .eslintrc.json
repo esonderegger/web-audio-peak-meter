@@ -1,14 +1,16 @@
 {
-    "extends": "google",
-    "installedESLint": true,
+    "extends": [
+        "airbnb-base",
+        "plugin:jest/all"
+    ],
+    "ignorePatterns": ["docs/**/*"],
     "parserOptions": {
-        "ecmaVersion": 5,
-        "sourceType": "script"
+        "ecmaVersion": 2017,
+        "sourceType": "module"
     },
     "rules": {
-        "no-var": "off",
-        "semi": "error",
-        "require-jsdoc": "off"
+        "no-param-reassign": "off",
+        "no-restricted-properties": "warn"
     },
     "plugins": [
     ],

@@ -1,6 +1,7 @@
 # Web Audio Peak Meters
-
 Customizable peak meters, using the web audio API. It can measure peak or true peak based on ITU-R BS.1770
+
+[![Build Status](https://travis-ci.org/esonderegger/web-audio-peak-meter.svg?branch=master)](https://travis-ci.org/esonderegger/web-audio-peak-meter)
 
 ## Demo
 
@@ -68,6 +69,17 @@ myAudio.addEventListener('play', function() {
 ```
 
 (Note: the markup remains the same as in the basic example)
+
+## Local Development
+
+The minified javascript is built using rollup. There's no difference (for now) between the development version and the production version. To start a local server for debugging, run:
+
+```
+npm ci
+npm run start
+```
+
+And open a browser to [http://localhost:6080/index.html](http://localhost:6080/index.html) to see a local version of the docs page.
 
 ## Contributing
 
