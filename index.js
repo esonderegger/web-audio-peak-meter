@@ -10,7 +10,8 @@ var webAudioPeakMeter = (function() {
     dbRange: 48,
     dbTickSize: 6,
     maskTransition: '0.1s',
-    audioMeterStandard: 'peak-sample' // Could be "true-peak" (ITU-R BS.1770) or "peak-sample"
+    audioMeterStandard: 'peak-sample', // Could be "true-peak" (ITU-R BS.1770) or "peak-sample"
+    showPerformance: false
   };
   var tickWidth;
   var elementWidth;
@@ -29,7 +30,7 @@ var webAudioPeakMeter = (function() {
 
   // Used for ITU-R BS.1770
   var lpfCoefficients = [];
-  var lpfBuffer = [];
+  var lpfBuffer = undefined;
   var upsampleFactor = 4;
   var lastChannelTP = [];
   var decayFactor = 0.99999;
@@ -247,6 +248,7 @@ var webAudioPeakMeter = (function() {
     var channelMaxes = [];
     
     // Calculate peak levels
+    const startTime = Date.now();
     if (options.audioMeterStandard == 'true-peak') {
       // This follows ITU-R BS.1770 (True Peak meter)
       channelMaxes = calculateTPValues(inputBuffer);
@@ -254,6 +256,9 @@ var webAudioPeakMeter = (function() {
     else {
       // Just get the peak level
       channelMaxes = calculateMaxValues(inputBuffer);
+    }
+    if (options.showPerformance) {
+      console.log('Time to calculate peaks: ' + (Date.now() - startTime)+ 'ms')
     }
     // Update peak & text values
     for (var i = 0; i < channelCount; i++) {
@@ -293,10 +298,16 @@ var webAudioPeakMeter = (function() {
       decayFactor = Math.pow(attFactor, 1.0/(inputBuffer.sampleRate * decayTimeS));
       console.log('Initialized with decayFactor ' + decayFactor);
     }
+    if (lpfBuffer === undefined) {
+      lpfBuffer = [];
+      for (var c = 0; c < channelCount; c++) {
+        lpfBuffer.push([]);
+      }
+    }
     for (var c = 0; c < channelCount; c++) {
       var channelData = inputBuffer.getChannelData(c);
       // Process according to ITU-R BS.1770
-      var overSampledAndLPF = audioOverSampleAndFilter(channelData, inputBuffer.sampleRate);
+      var overSampledAndLPF = audioOverSampleAndFilter(channelData, inputBuffer.sampleRate, c);
       for (var s = 0; s < overSampledAndLPF.length; s++) {
         lastChannelTP[c] = lastChannelTP[c] * decayFactor;
         if (Math.abs(overSampledAndLPF[s]) > lastChannelTP[c]) {
@@ -307,7 +318,7 @@ var webAudioPeakMeter = (function() {
     return lastChannelTP;
   };
 
-  var audioOverSampleAndFilter = function (channelData, inputFs) {
+  var audioOverSampleAndFilter = function (channelData, inputFs, channelIndex) {
     var res = [];
     // Initialize filter coefficients and buffer
     if (lpfCoefficients.length <= 0) {
@@ -316,11 +327,14 @@ var webAudioPeakMeter = (function() {
         upsampleFactor = 2;
       }
       lpfCoefficients = calculateLPFCoefficients(33);
-      lpfBuffer = createAndIniArray(lpfCoefficients.length, 0.0);
-      console.log('Initialized lpfCoefficients lpfCoefficients=[' + lpfCoefficients.join(',') + '], and lpfBuffer: [' + lpfBuffer.join(',') + ']');
+      console.log('Initialized lpfCoefficients lpfCoefficients=[' + lpfCoefficients.join(',') + '], and lpfBuffer');
+    }
+    if (lpfBuffer[channelIndex].length <= 0) {
+      lpfBuffer[channelIndex] = createAndIniArray(lpfCoefficients.length, 0.0);
+      console.log('Initialized lpfBuffer for channel index ' + channelIndex);
     }
     for (var ni = 0; ni < channelData.length; ni++) {
-      var samplesOut = filterSample(channelData[ni]); // 1 input sample -> generated upsampleFactor samples
+      var samplesOut = filterSample(channelData[ni], channelIndex); // 1 input sample -> generated upsampleFactor samples
       res = res.concat(samplesOut);
     }
     return res;
@@ -354,18 +368,20 @@ var webAudioPeakMeter = (function() {
     return ret;
   };
 
-  var filterSample = function (sample) {
+  var filterSample = function (sample, channelIndex) {
     var ret = [];
-    lpfBuffer.push(sample);
-    if (lpfBuffer.length >= lpfCoefficients.length) {
-      lpfBuffer.shift();
+    var lpfChannelBuffer = lpfBuffer[channelIndex];
+    
+    lpfChannelBuffer.push(sample);
+    if (lpfChannelBuffer.length >= lpfCoefficients.length) {
+      lpfChannelBuffer.shift();
     }
     
     for (var nA = 0; nA < upsampleFactor; nA++)	{
       var nT = 0;
       var retVal = 0;
       for (var nc = nA; nc < lpfCoefficients.length; nc = nc + upsampleFactor) {
-        retVal = retVal + (lpfCoefficients[nc] * lpfBuffer[lpfBuffer.length - 1 -nT]);
+        retVal = retVal + (lpfCoefficients[nc] * lpfChannelBuffer[lpfChannelBuffer.length - 1 -nT]);
         nT++;
       }
       ret.push(retVal);
