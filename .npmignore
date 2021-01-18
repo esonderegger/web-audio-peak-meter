@@ -1,0 +1,8 @@
+docs/
+src/*.test.js
+.eslintrc.json
+.gitignore
+.npmignore
+.travis.yml
+rollup.config.js
+workspace.code-workspace

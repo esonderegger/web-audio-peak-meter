@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Web Audio Peak Meters</title>
+  <style type="text/css">
+    body {
+      background-color: #eee;
+      font-size: 18px;
+      font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-weight: 300;
+      margin: 2em auto;
+      max-width: 40em;
+      line-height: 1.5;
+      color: #444;
+      padding: 0 0.5em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.2;
+    }
+
+    a {
+      color: #607d8b;
+    }
+
+    .highlighter-rouge {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: .2em;
+      font-size: .8em;
+      overflow-x: auto;
+      padding: .2em .4em;
+    }
+
+    pre {
+      margin: 0;
+      padding: .6em;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 id="web-audio-peak-meters">Web Audio Peak Meters</h1>
+
+  <p>Customizable peak meters, using the web audio API.</p>
+
+  <h2 id="demo">Demo</h2>
+
+  <div>
+    <div id="demo1-peak-meter" style="width: 5em; height: 20em; margin: 1em 0;">
+    </div>
+    <audio id="demo1-audio" preload="metadata" controls="controls">
+      <source src="audio/marines_hymn.mp3" type="audio/mpeg" />
+    </audio>
+  </div>
+
+  <h2 id="usage-basic">Usage (basic)</h2>
+
+  <p>To use these meters, first create a <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code> with a
+    width and height and an <code class="language-plaintext highlighter-rouge">&lt;audio&gt;</code> element:</p>
+
+  <div class="language-plaintext highlighter-rouge">
+    <div class="highlight">
+      <pre class="highlight"><code>&lt;div id="my-peak-meter" style="width: 5em; height: 20em; margin: 1em 0;"&gt;
+&lt;/div&gt;
+&lt;audio id="my-audio" preload="metadata" controls="controls"&gt;
+  &lt;source src="audio/marines_hymn.mp3" type="audio/mpeg"&gt;
+&lt;/audio&gt;
+</code></pre>
+    </div>
+  </div>
+
+  <p>Then, at the bottom of your <code class="language-plaintext highlighter-rouge">&lt;body&gt;</code> tag, add the
+    script tag for these meters. Next, create an <code class="language-plaintext highlighter-rouge">AudioContext</code>
+    if you don’t have one already and create an <a
+      href="https://developer.mozilla.org/en-US/docs/Web/API/AudioNode">AudioNode</a> from the <code
+      class="language-plaintext highlighter-rouge">&lt;audio&gt;</code> element, connecting it to the destination node.
+    Finally, create a meter node and call the <code class="language-plaintext highlighter-rouge">createMeter</code>
+    function, passing in the Element object, the meter node, and an optional object for configuration options, like so:
+  </p>
+
+  <p>Note: for this to work in Google Chrome, we have to resume the audio context after a user gesture (<a
+      href="https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio">more info</a>). Adding a
+    listener to the audio element’s <code class="language-plaintext highlighter-rouge">play</code> event is one way to
+    do this.</p>
+
+  <div class="language-plaintext highlighter-rouge">
+    <div class="highlight">
+      <pre class="highlight"><code>&lt;script src="https://esonderegger.github.io/web-audio-peak-meter/web-audio-peak-meter-2.0.0.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  var myMeterElement = document.getElementById('my-peak-meter');
+  var myAudio = document.getElementById('my-audio');
+  var audioCtx = new window.AudioContext();
+  var sourceNode = audioCtx.createMediaElementSource(myAudio);
+  sourceNode.connect(audioCtx.destination);
+  var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
+  webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+  myAudio.addEventListener('play', function() {
+    audioCtx.resume();
+  });
+&lt;/script&gt;
+</code></pre>
+    </div>
+  </div>
+
+  <p>In this example we used an HTML5 audio element, but these meters can work with any web audio API source node. This
+    example was just meant to show the simplest possible use case. If you are already familiar with the web audio API
+    adapting this example to your needs should be fairly self-explanatory, but please reach out if anything isn’t
+    working or doesn’t make sense.</p>
+
+  <h2 id="usage-advanced">Usage (advanced)</h2>
+
+  <p>If you are compiling your javascript with a tool like browserify, webpack, or rollup, you can integrate these
+    meters into your site using the CommonJS <code class="language-plaintext highlighter-rouge">require()</code> syntax.
+  </p>
+
+  <p>First, add web-audio-peak-meter as a dev dependency to your project:</p>
+
+  <div class="language-plaintext highlighter-rouge">
+    <div class="highlight">
+      <pre class="highlight"><code>npm install --save-dev web-audio-peak-meter
+</code></pre>
+    </div>
+  </div>
+
+  <p>Next, import the webAudioPeakMeter module into your javascript:</p>
+
+  <div class="language-plaintext highlighter-rouge">
+    <div class="highlight">
+      <pre class="highlight"><code>var webAudioPeakMeter = require('web-audio-peak-meter');
+</code></pre>
+    </div>
+  </div>
+
+  <p>Finally, use as you would in the above example:</p>
+
+  <div class="language-plaintext highlighter-rouge">
+    <div class="highlight">
+      <pre class="highlight"><code>var myMeterElement = document.getElementById('my-peak-meter');
+var myAudio = document.getElementById('my-audio');
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+var sourceNode = audioCtx.createMediaElementSource(myAudio);
+sourceNode.connect(audioCtx.destination);
+var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
+webAudioPeakMeter.createMeter(myMeterElement, meterNode, {});
+myAudio.addEventListener('play', function() {
+  audioCtx.resume();
+});
+</code></pre>
+    </div>
+  </div>
+
+  <p>(Note: the markup remains the same as in the basic example)</p>
+
+  <h2 id="demo">More Examples</h2>
+
+  <div>
+    <div id="demo2-peak-meter" style="width: 100%; height: 5em; margin: 1em 0;">
+    </div>
+    <audio id="demo2-audio" preload="metadata" controls="controls">
+      <source src="audio/semper_fidelis.mp3" type="audio/mpeg" />
+    </audio>
+  </div>
+
+  <h2 id="contributing">Contributing</h2>
+
+  <p>Contributions are welcome! I’d love to hear any ideas for how these meters could be more user-friendly as well as
+    about any bugs or unclear documentation. If you are at all interested in this project, please create an issue or
+    pull request on this project’s <a href="https://github.com/esonderegger/web-audio-peak-meter">github page</a>.</p>
+
+  <h2 id="copyright-and-license">Copyright and license</h2>
+
+  <p>Code and documentation copyright 2016 <a href="https://rpy.xyz">Evan Sonderegger</a> and released under the <a
+      href="https://github.com/esonderegger/web-audio-peak-meter/blob/master/LICENSE">MIT License</a>.</p>
+  <script src="web-audio-peak-meter-2.0.0.min.js"></script>
+  <script>
+    function initDemo(meterId, audioId, options, ctx) {
+      var meterElement = document.getElementById(meterId);
+      var audioElement = document.getElementById(audioId);
+      var sourceNode = ctx.createMediaElementSource(audioElement);
+      sourceNode.connect(ctx.destination);
+      var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, ctx);
+      webAudioPeakMeter.createMeter(meterElement, meterNode, options);
+      audioElement.addEventListener('play', function () {
+        ctx.resume();
+      });
+    }
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    initDemo('demo1-peak-meter', 'demo1-audio', { audioMeterStandard: 'true-peak' }, audioCtx);
+    initDemo('demo2-peak-meter', 'demo2-audio', { backgroundColor: '#555' }, audioCtx);
+  </script>
+</body>
+
+</html>
