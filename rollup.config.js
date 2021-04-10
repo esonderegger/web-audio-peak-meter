@@ -6,7 +6,7 @@ const terser = require('rollup-plugin-terser');
 module.exports = {
   input: 'src/index.js',
   output: {
-    file: 'docs/web-audio-peak-meter-2.0.0.min.js',
+    file: 'docs/web-audio-peak-meter-2.1.0.min.js',
     format: 'iife',
     name: 'webAudioPeakMeter',
     exports: 'named',

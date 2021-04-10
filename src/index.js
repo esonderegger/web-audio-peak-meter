@@ -15,6 +15,7 @@ const defaultConfig = {
   maskTransition: '0.1s',
   audioMeterStandard: 'peak-sample', // Could be "true-peak" (ITU-R BS.1770) or "peak-sample"
   refreshEveryApproxMs: 20,
+  peakHoldDuration: null,
 };
 
 function createMeterNode(sourceNode, audioCtx, options = {}) {
@@ -33,7 +34,7 @@ function createMeterNode(sourceNode, audioCtx, options = {}) {
 
 function updateMeter(audioProcessingEvent, config, meterData) {
   const { inputBuffer } = audioProcessingEvent;
-  const { audioMeterStandard } = config;
+  const { audioMeterStandard, peakHoldDuration } = config;
   let channelMaxes = [];
 
   // Calculate peak levels
@@ -49,6 +50,14 @@ function updateMeter(audioProcessingEvent, config, meterData) {
     meterData.tempPeaks[i] = channelMaxes[i];
     if (channelMaxes[i] > meterData.heldPeaks[i]) {
       meterData.heldPeaks[i] = channelMaxes[i];
+      if (peakHoldDuration) {
+        if (meterData.peakHoldTimeouts[i]) {
+          clearTimeout(meterData.peakHoldTimeouts[i]);
+        }
+        meterData.peakHoldTimeouts[i] = setTimeout(() => {
+          meterData.heldPeaks[i] = meterData.tempPeaks[i];
+        }, peakHoldDuration);
+      }
     }
   }
 }
@@ -64,6 +73,7 @@ function createMeter(domElement, meterNode, options = {}) {
 
   meterData.tempPeaks = new Array(channelCount).fill(0.0);
   meterData.heldPeaks = new Array(channelCount).fill(0.0);
+  meterData.peakHoldTimeouts = new Array(channelCount).fill(null);
   meterData.channelCount = channelCount;
 
   meterData.channelBars = markup.createBars(meterElement, config, meterData);
