@@ -70,6 +70,13 @@ myAudio.addEventListener('play', function() {
 
 (Note: the markup remains the same as in the basic example)
 
+## Options
+
+The following options options are supported (the third parameter of createMeter)
+
+- dbRange (number): the decibel level of the floor of the metter (default: 48)
+- peakHoldDuration (number - optional): the number, in milliseconds, to hold the peak value before resetting (default: null, meaning never reset)
+
 ## Local Development
 
 The minified javascript is built using rollup. There's no difference (for now) between the development version and the production version. To start a local server for debugging, run:

@@ -157,6 +157,14 @@ myAudio.addEventListener('play', function() {
 
   <p>(Note: the markup remains the same as in the basic example)</p>
 
+  <h2 id="options">Options</h2>
+
+  <p>The following options options are supported (the third parameter of createMeter)</p>
+  <ul>
+    <li>dbRange (number): the decibel level of the floor of the metter (default: 48)</li>
+    <li>peakHoldDuration (number - optional): the number, in milliseconds, to hold the peak value before resetting (default: null, meaning never reset)</li>
+  </ul>
+
   <h2 id="demo">More Examples</h2>
 
   <div>
@@ -177,7 +185,7 @@ myAudio.addEventListener('play', function() {
 
   <p>Code and documentation copyright 2016 <a href="https://rpy.xyz">Evan Sonderegger</a> and released under the <a
       href="https://github.com/esonderegger/web-audio-peak-meter/blob/master/LICENSE">MIT License</a>.</p>
-  <script src="web-audio-peak-meter-2.0.0.min.js"></script>
+  <script src="web-audio-peak-meter-2.1.0.min.js"></script>
   <script>
     function initDemo(meterId, audioId, options, ctx) {
       var meterElement = document.getElementById(meterId);
@@ -192,7 +200,7 @@ myAudio.addEventListener('play', function() {
     }
     var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     initDemo('demo1-peak-meter', 'demo1-audio', { audioMeterStandard: 'true-peak' }, audioCtx);
-    initDemo('demo2-peak-meter', 'demo2-audio', { backgroundColor: '#555' }, audioCtx);
+    initDemo('demo2-peak-meter', 'demo2-audio', { backgroundColor: '#555', peakHoldDuration: 5000 }, audioCtx);
   </script>
 </body>
 
