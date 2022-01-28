@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Oscillator Demo</title>
+  <link href="/docs.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1 id="web-audio-peak-meters">A simple oscillator node</h1>
+  <p>Just testing some things</p>
+  <button id="start-button">Start</button>
+  <div>
+    <input type="range" id="volume" name="volume" min="0" max="1" value="0" step="0.05">
+    <label for="volume">Volume</label>
+  </div>
+  <div>
+    <input type="range" id="panning" name="panning" min="-1" max="1" value="0" step="0.1">
+    <label for="panning">Pan</label>
+  </div>
+  <div id="peak-meter" style="height: 60px;"></div>
+  <div id="peak-meter-2" style="height: 360px; width: 80px; margin-top: 20px;"></div>
+  
+  <script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+  <script>
+
+    const audioCtx = new AudioContext();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const panNode = audioCtx.createStereoPanner();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // value in hertz
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    panNode.pan.setValueAtTime(0, audioCtx.currentTime);
+    oscillator.connect(gainNode);
+    gainNode.connect(panNode);
+    panNode.connect(audioCtx.destination);
+    oscillator.start();
+
+    const meterElement = document.getElementById('peak-meter');
+    const test = new webAudioPeakMeter.WebAudioPeakMeter(audioCtx, panNode, meterElement);
+    const meterElement2 = document.getElementById('peak-meter-2');
+    setTimeout(() => {
+      const test2 = new webAudioPeakMeter.WebAudioPeakMeter(audioCtx, panNode, meterElement2, { vertical: true});
+    }, 500);
+    // const test2 = new webAudioPeakMeter.WebAudioPeakMeter(audioCtx, panNode, meterElement2, { vertical: true});
+
+    const sliderElement = document.getElementById('volume');
+    sliderElement.addEventListener('change', (evt) => {
+      gainNode.gain.setValueAtTime(evt.target.value, audioCtx.currentTime);
+    });
+    const panningElement = document.getElementById('panning');
+    panningElement.addEventListener('change', (evt) => {
+      panNode.pan.setValueAtTime(evt.target.value, audioCtx.currentTime);
+    });
+    const buttonElement = document.getElementById('start-button');
+    buttonElement.addEventListener('click', () => {
+      audioCtx.resume();
+    });
+  </script>
+</body>
+
+</html>

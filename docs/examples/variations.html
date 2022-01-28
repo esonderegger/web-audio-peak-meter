@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple variations using options</title>
+  <link href="/docs.css" rel="stylesheet">
+</head>
+<body>
+<h1 id="multiple-variations-using-options">Multiple variations using options</h1>
+<p>This demo serves to demonstrate using multiple meters on the same page as well as showing how some of the available options can be used.</p>
+
+<h2>Working Example</h2>
+<p>The web audio API context is <span id="ctx-status">loading</span>. <button id="ctx-button">Loading</button></p>
+
+<p>Player One</p>
+<audio id="audio-one" preload="metadata" crossorigin="anonymous" controls="controls">
+  <source src="https://assets.rpy.xyz/testmedia/semper_fidelis.mp3" type="audio/mpeg" />
+</audio>
+<p>Default options</p>
+<div id="meter-one-a" style="height: 80px"></div>
+<p>Peak Clear duration</p>
+<div id="meter-one-b" style="height: 80px"></div>
+
+<p>Player Two</p>
+<audio id="audio-two" preload="metadata" crossorigin="anonymous" controls="controls">
+  <source src="https://assets.rpy.xyz/testmedia/marines_hymn.mp3" type="audio/mpeg" />
+</audio>
+<p>Vertical set to true</p>
+<div id="meter-two-a" style="height: 300px; width: 80px;"></div>
+
+<h2>HTML code</h2>
+<pre class="code-block"><code>&lt;p&gt;The web audio API context is &lt;span id=&quot;ctx-status&quot;&gt;loading&lt;/span&gt;. &lt;button id=&quot;ctx-button&quot;&gt;Loading&lt;/button&gt;&lt;/p&gt;
+
+&lt;p&gt;Player One&lt;/p&gt;
+&lt;audio id=&quot;audio-one&quot; preload=&quot;metadata&quot; crossorigin=&quot;anonymous&quot; controls=&quot;controls&quot;&gt;
+  &lt;source src=&quot;https://assets.rpy.xyz/testmedia/semper_fidelis.mp3&quot; type=&quot;audio/mpeg&quot; /&gt;
+&lt;/audio&gt;
+&lt;p&gt;Default options&lt;/p&gt;
+&lt;div id=&quot;meter-one-a&quot; style=&quot;height: 80px&quot;&gt;&lt;/div&gt;
+&lt;p&gt;Peak Clear duration&lt;/p&gt;
+&lt;div id=&quot;meter-one-b&quot; style=&quot;height: 80px&quot;&gt;&lt;/div&gt;
+
+&lt;p&gt;Player Two&lt;/p&gt;
+&lt;audio id=&quot;audio-two&quot; preload=&quot;metadata&quot; crossorigin=&quot;anonymous&quot; controls=&quot;controls&quot;&gt;
+  &lt;source src=&quot;https://assets.rpy.xyz/testmedia/marines_hymn.mp3&quot; type=&quot;audio/mpeg&quot; /&gt;
+&lt;/audio&gt;
+&lt;p&gt;Vertical set to true&lt;/p&gt;
+&lt;div id=&quot;meter-two-a&quot; style=&quot;height: 300px; width: 80px;&quot;&gt;&lt;/div&gt;
+</code></pre>
+<h2>Javascript code</h2>
+<pre class="code-block"><code>const audioCtx = new AudioContext();
+
+const buttonElement = document.getElementById(&#039;ctx-button&#039;);
+buttonElement.addEventListener(&#039;click&#039;, () =&gt; {
+  if (audioCtx.state === &#039;suspended&#039;) {
+    audioCtx.resume();
+  } else {
+    audioCtx.suspend();
+  }
+});
+
+const ctxStatus = document.getElementById(&#039;ctx-status&#039;);
+setInterval(() =&gt; {
+  ctxStatus.innerText = audioCtx.state;
+  if (audioCtx.state === &#039;suspended&#039;) {
+    buttonElement.innerText = &#039;Resume&#039;;
+  } else {
+    buttonElement.innerText = &#039;Suspend&#039;;
+  }
+}, 100);
+
+const audioElementOne = document.getElementById(&#039;audio-one&#039;);
+const audioElementTwo = document.getElementById(&#039;audio-two&#039;);
+
+const sourceNodeOne = audioCtx.createMediaElementSource(audioElementOne);
+const sourceNodeTwo = audioCtx.createMediaElementSource(audioElementTwo);
+sourceNodeOne.connect(audioCtx.destination);
+sourceNodeTwo.connect(audioCtx.destination);
+
+const elementOneA = document.getElementById(&#039;meter-one-a&#039;);
+const meterOneA = new webAudioPeakMeter.WebAudioPeakMeter(sourceNodeOne, elementOneA);
+const elementOneB = document.getElementById(&#039;meter-one-b&#039;);
+const optionsOneB = {
+  backgroundColor: &#039;#555&#039;,
+  peakHoldDuration: 2000,
+};
+const meterOneB = new webAudioPeakMeter.WebAudioPeakMeter(sourceNodeOne, elementOneB, optionsOneB);
+const elementTwoA = document.getElementById(&#039;meter-two-a&#039;);
+const optionsTwoA = {
+  vertical: true,
+};
+const meterTwoA = new webAudioPeakMeter.WebAudioPeakMeter(sourceNodeTwo, elementTwoA, optionsTwoA);
+</code></pre>
+<script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+<script>
+const audioCtx = new AudioContext();
+
+const buttonElement = document.getElementById('ctx-button');
+buttonElement.addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  } else {
+    audioCtx.suspend();
+  }
+});
+
+const ctxStatus = document.getElementById('ctx-status');
+setInterval(() => {
+  ctxStatus.innerText = audioCtx.state;
+  if (audioCtx.state === 'suspended') {
+    buttonElement.innerText = 'Resume';
+  } else {
+    buttonElement.innerText = 'Suspend';
+  }
+}, 100);
+
+const audioElementOne = document.getElementById('audio-one');
+const audioElementTwo = document.getElementById('audio-two');
+
+const sourceNodeOne = audioCtx.createMediaElementSource(audioElementOne);
+const sourceNodeTwo = audioCtx.createMediaElementSource(audioElementTwo);
+sourceNodeOne.connect(audioCtx.destination);
+sourceNodeTwo.connect(audioCtx.destination);
+
+const elementOneA = document.getElementById('meter-one-a');
+const meterOneA = new webAudioPeakMeter.WebAudioPeakMeter(sourceNodeOne, elementOneA);
+const elementOneB = document.getElementById('meter-one-b');
+const optionsOneB = {
+  backgroundColor: '#555',
+  peakHoldDuration: 2000,
+};
+const meterOneB = new webAudioPeakMeter.WebAudioPeakMeter(sourceNodeOne, elementOneB, optionsOneB);
+const elementTwoA = document.getElementById('meter-two-a');
+const optionsTwoA = {
+  vertical: true,
+};
+const meterTwoA = new webAudioPeakMeter.WebAudioPeakMeter(sourceNodeTwo, elementTwoA, optionsTwoA);
+
+</script>
+</body>
+</html>

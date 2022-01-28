@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>A simple oscillator node</title>
+  <link href="/docs.css" rel="stylesheet">
+</head>
+<body>
+<h1 id="a-simple-oscillator-node">A simple oscillator node</h1>
+<p>A minimal example using an oscillator node as a source. In this example, the first meter visualizes the level of the <code>gainNode</code> and the second meter visualizes the level of the <code>panNode</code>.</p>
+
+<h2>Working Example</h2>
+<p>The web audio API context is <span id="ctx-status">loading</span>. <button id="ctx-button">Loading</button></p>
+<div>
+  <input type="range" id="gain" name="gain" min="0" max="1" value="0" step="0.05">
+  <label for="gain">Gain</label>
+</div>
+<div id="peak-meter-1" style="height: 60px; margin-bottom: 20px;"></div>
+<div>
+  <input type="range" id="panning" name="panning" min="-1" max="1" value="0" step="0.1">
+  <label for="panning">Pan</label>
+</div>
+<div id="peak-meter-2" style="height: 60px;"></div>
+
+<h2>HTML code</h2>
+<pre class="code-block"><code>&lt;p&gt;The web audio API context is &lt;span id=&quot;ctx-status&quot;&gt;loading&lt;/span&gt;. &lt;button id=&quot;ctx-button&quot;&gt;Loading&lt;/button&gt;&lt;/p&gt;
+&lt;div&gt;
+  &lt;input type=&quot;range&quot; id=&quot;gain&quot; name=&quot;gain&quot; min=&quot;0&quot; max=&quot;1&quot; value=&quot;0&quot; step=&quot;0.05&quot;&gt;
+  &lt;label for=&quot;gain&quot;&gt;Gain&lt;/label&gt;
+&lt;/div&gt;
+&lt;div id=&quot;peak-meter-1&quot; style=&quot;height: 60px; margin-bottom: 20px;&quot;&gt;&lt;/div&gt;
+&lt;div&gt;
+  &lt;input type=&quot;range&quot; id=&quot;panning&quot; name=&quot;panning&quot; min=&quot;-1&quot; max=&quot;1&quot; value=&quot;0&quot; step=&quot;0.1&quot;&gt;
+  &lt;label for=&quot;panning&quot;&gt;Pan&lt;/label&gt;
+&lt;/div&gt;
+&lt;div id=&quot;peak-meter-2&quot; style=&quot;height: 60px;&quot;&gt;&lt;/div&gt;
+</code></pre>
+<h2>Javascript code</h2>
+<pre class="code-block"><code>const audioCtx = new AudioContext();
+
+const ctxStatus = document.getElementById(&#039;ctx-status&#039;);
+setInterval(() =&gt; {
+  ctxStatus.innerText = audioCtx.state;
+  if (audioCtx.state === &#039;suspended&#039;) {
+    buttonElement.innerText = &#039;Resume&#039;;
+  } else {
+    buttonElement.innerText = &#039;Suspend&#039;;
+  }
+}, 100);
+
+const buttonElement = document.getElementById(&#039;ctx-button&#039;);
+buttonElement.addEventListener(&#039;click&#039;, () =&gt; {
+  if (audioCtx.state === &#039;suspended&#039;) {
+    audioCtx.resume();
+  } else {
+    audioCtx.suspend();
+  }
+});
+
+const oscillatorNode = audioCtx.createOscillator();
+const gainNode = audioCtx.createGain();
+const panNode = audioCtx.createStereoPanner();
+
+oscillatorNode.type = &#039;sine&#039;;
+oscillatorNode.frequency.setValueAtTime(440, audioCtx.currentTime);
+gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+panNode.pan.setValueAtTime(0, audioCtx.currentTime);
+oscillatorNode.connect(gainNode);
+gainNode.connect(panNode);
+panNode.connect(audioCtx.destination);
+oscillatorNode.start();
+
+const meterElement1 = document.getElementById(&#039;peak-meter-1&#039;);
+const meter1 = new webAudioPeakMeter.WebAudioPeakMeter(gainNode, meterElement1);
+const meterElement2 = document.getElementById(&#039;peak-meter-2&#039;);
+const meter2 = new webAudioPeakMeter.WebAudioPeakMeter(panNode, meterElement2);
+
+const gainSlider = document.getElementById(&#039;gain&#039;);
+gainSlider.addEventListener(&#039;change&#039;, (evt) =&gt; {
+  gainNode.gain.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
+
+const panningSlider = document.getElementById(&#039;panning&#039;);
+panningSlider.addEventListener(&#039;change&#039;, (evt) =&gt; {
+  panNode.pan.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
+</code></pre>
+<script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+<script>
+const audioCtx = new AudioContext();
+
+const ctxStatus = document.getElementById('ctx-status');
+setInterval(() => {
+  ctxStatus.innerText = audioCtx.state;
+  if (audioCtx.state === 'suspended') {
+    buttonElement.innerText = 'Resume';
+  } else {
+    buttonElement.innerText = 'Suspend';
+  }
+}, 100);
+
+const buttonElement = document.getElementById('ctx-button');
+buttonElement.addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  } else {
+    audioCtx.suspend();
+  }
+});
+
+const oscillatorNode = audioCtx.createOscillator();
+const gainNode = audioCtx.createGain();
+const panNode = audioCtx.createStereoPanner();
+
+oscillatorNode.type = 'sine';
+oscillatorNode.frequency.setValueAtTime(440, audioCtx.currentTime);
+gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+panNode.pan.setValueAtTime(0, audioCtx.currentTime);
+oscillatorNode.connect(gainNode);
+gainNode.connect(panNode);
+panNode.connect(audioCtx.destination);
+oscillatorNode.start();
+
+const meterElement1 = document.getElementById('peak-meter-1');
+const meter1 = new webAudioPeakMeter.WebAudioPeakMeter(gainNode, meterElement1);
+const meterElement2 = document.getElementById('peak-meter-2');
+const meter2 = new webAudioPeakMeter.WebAudioPeakMeter(panNode, meterElement2);
+
+const gainSlider = document.getElementById('gain');
+gainSlider.addEventListener('change', (evt) => {
+  gainNode.gain.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
+
+const panningSlider = document.getElementById('panning');
+panningSlider.addEventListener('change', (evt) => {
+  panNode.pan.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
+
+</script>
+</body>
+</html>
