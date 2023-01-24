@@ -62,12 +62,17 @@ function updateMeter(audioProcessingEvent, config, meterData) {
   }
 }
 
-function createMeter(domElement, meterNode, options = {}) {
+function createMeter(domElement, meterNode, options = {}, callback = null) {
   // eslint-disable-next-line prefer-object-spread
   const config = Object.assign({}, defaultConfig, options);
 
-  const meterElement = markup.createContainerDiv(domElement, config);
-  const meterData = markup.createTicks(meterElement, config);
+  let meterElement = null;
+  let meterData = {};
+
+  if (domElement != null) {
+    meterElement = markup.createContainerDiv(domElement, config);
+    meterData = markup.createTicks(meterElement, config);
+  }
 
   const { channelCount } = meterNode;
 
@@ -76,9 +81,11 @@ function createMeter(domElement, meterNode, options = {}) {
   meterData.peakHoldTimeouts = new Array(channelCount).fill(null);
   meterData.channelCount = channelCount;
 
-  meterData.channelBars = markup.createBars(meterElement, config, meterData);
-  meterData.channelMasks = markup.createMasks(meterElement, config, meterData);
-  meterData.textLabels = markup.createPeakLabels(meterElement, config, meterData);
+  if (domElement != null) {
+    meterData.channelBars = markup.createBars(meterElement, config, meterData);
+    meterData.channelMasks = markup.createMasks(meterElement, config, meterData);
+    meterData.textLabels = markup.createPeakLabels(meterElement, config, meterData);
+  }
 
   if (config.audioMeterStandard === 'true-peak') {
     meterData.lpfCoefficients = [];
@@ -88,11 +95,17 @@ function createMeter(domElement, meterNode, options = {}) {
     meterData.decayFactor = 0.99999;
   }
 
-  meterNode.onaudioprocess = (evt) => updateMeter(evt, config, meterData);
-  meterElement.addEventListener('click', () => {
-    meterData.heldPeaks.fill(0.0);
-  }, false);
-  markup.paintMeter(config, meterData);
+  meterNode.onaudioprocess = (evt) => {
+    updateMeter(evt, config, meterData);
+    callback(meterData);
+  }
+
+  if (domElement != null) {
+    meterElement.addEventListener('click', () => {
+      meterData.heldPeaks.fill(0.0);
+    }, false);
+    markup.paintMeter(config, meterData);
+  }
 }
 
 module.exports = {
