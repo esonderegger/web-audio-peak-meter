@@ -1,8 +1,6 @@
 docs/
-src/*.test.js
+src/*.test.ts
 .eslintrc.json
 .gitignore
 .npmignore
-.travis.yml
 rollup.config.js
-workspace.code-workspace

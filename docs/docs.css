@@ -1,0 +1,31 @@
+body {
+  background-color: #eee;
+  font-size: 18px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  margin: 2em auto;
+  max-width: 40em;
+  line-height: 1.5;
+  color: #444;
+  padding: 0 0.5em;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #607d8b;
+}
+
+pre {
+  margin: 0;
+  padding: .6em;
+  overflow-x: auto;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: .2em;
+  font-size: .8em;
+}

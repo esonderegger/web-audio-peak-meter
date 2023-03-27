@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Video Demo</title>
+  <link href="/docs.css" rel="stylesheet">
+  <style>
+    .demo-video {
+      display: flex;
+      align-items: stretch;
+    }
+    .demo-video video {
+      width: calc(100% - 80px);
+    }
+    .peak-meter {
+      width: 80px;
+    }
+    .peak-meter-2 {
+      /* width: 100%; */
+      height: 60px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 id="web-audio-peak-meters">Video Demo</h1>
+  <p>A basic HTML5 video element with default meter settings</p>
+  <div class="demo-video">
+    <video controls id="the-video">
+      <source src="/video/webb_mission_overview.mp4" type="video/mp4">
+      Sorry, your browser doesn't support embedded videos.
+    </video>
+    <div id="peak-meter" class="peak-meter"></div>
+  </div>
+  <div id="peak-meter-2" class="peak-meter-2"></div>
+  
+  <script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+  <script>
+    const audioCtx = new AudioContext();
+    const videoElement = document.getElementById('the-video');
+    videoElement.addEventListener('play', () => {
+      audioCtx.resume();
+    });
+    const meterElement1 = document.getElementById('peak-meter');
+    const meterElement2 = document.getElementById('peak-meter-2');
+    const sourceNode = audioCtx.createMediaElementSource(videoElement);
+    sourceNode.connect(audioCtx.destination);
+    const test1 = new webAudioPeakMeter.WebAudioPeakMeter(audioCtx, sourceNode, meterElement1);
+    const test2 = new webAudioPeakMeter.WebAudioPeakMeter(audioCtx, sourceNode, meterElement2, { vertical: false, backgroundColor: '#333333' });
+  </script>
+</body>
+</html>

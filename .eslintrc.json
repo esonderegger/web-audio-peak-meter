@@ -1,9 +1,13 @@
 {
     "extends": [
-        "airbnb-base",
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
         "plugin:jest/all"
     ],
-    "ignorePatterns": ["docs/**/*"],
+    "ignorePatterns": [
+        "docs/**/*",
+        "examples/**/*"
+    ],
     "parserOptions": {
         "ecmaVersion": 2017,
         "sourceType": "module"
