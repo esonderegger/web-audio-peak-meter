@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Video Demo</title>
-  <link href="/docs.css" rel="stylesheet">
+  <link href="/web-audio-peak-meter/docs.css" rel="stylesheet">
   <style>
     .demo-video {
       display: flex;
@@ -28,14 +28,14 @@
   <p>A basic HTML5 video element with default meter settings</p>
   <div class="demo-video">
     <video controls id="the-video">
-      <source src="/video/webb_mission_overview.mp4" type="video/mp4">
+      <source src="/web-audio-peak-meter/video/webb_mission_overview.mp4" type="video/mp4">
       Sorry, your browser doesn't support embedded videos.
     </video>
     <div id="peak-meter" class="peak-meter"></div>
   </div>
   <div id="peak-meter-2" class="peak-meter-2"></div>
   
-  <script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+  <script src="/web-audio-peak-meter/web-audio-peak-meter-3.0.0.min.js"></script>
   <script>
     const audioCtx = new AudioContext();
     const videoElement = document.getElementById('the-video');
