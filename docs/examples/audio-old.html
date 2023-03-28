@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Video Demo</title>
-  <link href="/docs.css" rel="stylesheet">
+  <link href="/web-audio-peak-meter/docs.css" rel="stylesheet">
   <style>
     .demo-audio audio {
       width: 100%;
@@ -22,12 +22,12 @@
   <div class="demo-audio">
     <button id="start-button">Start</button>
     <audio id="the-audio" preload="metadata" controls="controls">
-      <source src="/audio/semper_fidelis.mp3" type="audio/mpeg" />
+      <source src="/web-audio-peak-meter/audio/semper_fidelis.mp3" type="audio/mpeg" />
     </audio>
     <div id="peak-meter" class="peak-meter"></div>
   </div>
   
-  <script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+  <script src="/web-audio-peak-meter/web-audio-peak-meter-3.0.0.min.js"></script>
   <script>
     const audioCtx = new AudioContext();
     const audioElement = document.getElementById('the-audio');
