@@ -142,11 +142,11 @@ export function createPeakLabels(
 }
 
 export function createBars(parents: HTMLElement[], config: PeakMeterConfig): Array<HTMLElement> {
-  const { gradient, vertical, fontSize } = config;
+  const { gradient, vertical, fontSize, maskTransition } = config;
   // const initialClipPath = audioClipPath(dbRange, dbRange, vertical);
   const barDivs = parents.map((parent) => {
     const barDiv = document.createElement('div');
-    barDiv.style.transition = 'clip-path 0.1s';
+    barDiv.style.transition = `clip-path ${maskTransition}`;
     if (vertical) {
       barDiv.style.height = `calc(100% - ${fontSize * verticalLabelHeight}px)`;
       barDiv.style.width = '100%';
