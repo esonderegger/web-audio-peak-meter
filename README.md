@@ -112,7 +112,7 @@ npm ci
 npm run start
 ```
 
-And open a browser to [http://localhost:6080/index.html](http://localhost:6080/index.html) to see a local version of the docs page.
+And open a browser to [http://localhost:6080/web-audio-peak-meter/index.html](http://localhost:6080/web-audio-peak-meter/index.html) to see a local version of the docs page.
 
 ## Contributing
 
