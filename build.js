@@ -50,8 +50,9 @@ async function buildMain() {
       terserPlugin.terser(),
     ],
   };
+  const version = process.env.npm_package_version;
   const iifeOutput = {
-    file: './docs/web-audio-peak-meter-3.0.0.min.js',
+    file: `./docs/web-audio-peak-meter-${version}.min.js`,
     format: 'iife',
     name: 'webAudioPeakMeter',
     exports: 'named',
@@ -92,6 +93,7 @@ function escapeHtml(unsafe) {
 function docHtml(content, markup, js) {
   const dom = new jsdom.JSDOM(content);
   const title = dom.window.document.querySelector('h1').textContent;
+  const version = process.env.npm_package_version;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,7 +115,7 @@ ${
   js
     ? `<h2>Javascript code</h2>
 <pre class="code-block"><code>${escapeHtml(js)}</code></pre>
-<script src="/web-audio-peak-meter/web-audio-peak-meter-3.0.0.min.js"></script>
+<script src="/web-audio-peak-meter/web-audio-peak-meter-${version}.min.js"></script>
 <script>
 ${js}
 </script>`
