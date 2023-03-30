@@ -97,7 +97,7 @@ function docHtml(content, markup, js) {
 <head>
   <meta charset="UTF-8">
   <title>${title}</title>
-  <link href="/docs.css" rel="stylesheet">
+  <link href="/web-audio-peak-meter/docs.css" rel="stylesheet">
 </head>
 <body>
 ${content}
@@ -113,7 +113,7 @@ ${
   js
     ? `<h2>Javascript code</h2>
 <pre class="code-block"><code>${escapeHtml(js)}</code></pre>
-<script src="/web-audio-peak-meter-3.0.0.min.js"></script>
+<script src="/web-audio-peak-meter/web-audio-peak-meter-3.0.0.min.js"></script>
 <script>
 ${js}
 </script>`
@@ -142,7 +142,7 @@ async function buildDocs() {
   await Promise.all(mds.map(buildDocExample));
   const readme = await fs.readFile('README.md');
   const readmeHtml = marked.marked(readme.toString(), { smartypants: true });
-  const subbed = readmeHtml.replace(/https:\/\/esonderegger.github.io\/web-audio-peak-meter/g, '');
+  const subbed = readmeHtml.replace(/https:\/\/esonderegger.github.io/g, '');
   const readmeDoc = docHtml(subbed);
   await fs.writeFile(path.join('docs', 'index.html'), readmeDoc);
   console.log('Docs rebuilt.');
@@ -160,6 +160,12 @@ async function localDev() {
   const port = process.env.PORT || 6080;
   const serve = serveStatic('./docs');
   const server = http.createServer((req, res) => {
+    if (req.url.length < '/web-audio-peak-meter'.length) {
+      res.writeHead(404, { 'Content-Type': 'text/html' });
+      res.end('404: File not found');
+      return;
+    }
+    req.url = req.url.slice('/web-audio-peak-meter'.length);
     const done = finalhandler(req, res);
     serve(req, res, done);
   });
