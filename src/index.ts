@@ -114,6 +114,11 @@ export class WebAudioPeakMeter {
     window.requestAnimationFrame(() => this.paintMeter());
   }
 
+  disconnectSource() {
+    if (!this.node) return;
+    this.node.disconnect();
+  }
+
   clearPeak(i: number) {
     this.heldPeaks[i] = this.tempPeaks[i];
   }
