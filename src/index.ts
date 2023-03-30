@@ -24,6 +24,7 @@ export class WebAudioPeakMeter {
   tempPeaks: Array<number>;
   heldPeaks: Array<number>;
   peakHoldTimeouts: Array<number>;
+  isActive: Boolean;
 
   constructor(src:AudioNode, ele: HTMLElement, options = {}) {
     this.srcNode = src;
@@ -32,6 +33,7 @@ export class WebAudioPeakMeter {
     this.tempPeaks = new Array(this.channelCount).fill(0.0);
     this.heldPeaks = new Array(this.channelCount).fill(0.0);
     this.peakHoldTimeouts = new Array(this.channelCount).fill(0);
+    this.isActive = false;
     if (ele) {
       this.parent = createContainerDiv(ele, this.config);
       this.channelElements = createChannelElements(this.parent, this.config, this.channelCount);
@@ -39,7 +41,7 @@ export class WebAudioPeakMeter {
       this.bars = createBars(this.channelElements, this.config);
       this.ticks = createTicks(this.parent, this.config);
       this.parent.addEventListener('click', () => this.clearPeaks());
-      this.paintMeter();
+      this.toggleActive(true);
     }
     this.initNode();
   }
@@ -93,6 +95,7 @@ export class WebAudioPeakMeter {
   }
 
   paintMeter() {
+    if (!this.isActive) return;
     const { dbRangeMin, dbRangeMax, vertical } = this.config;
     if (this.bars) {
       this.bars.forEach((barDiv, i) => {
@@ -112,6 +115,11 @@ export class WebAudioPeakMeter {
       });
     }
     window.requestAnimationFrame(() => this.paintMeter());
+  }
+
+  toggleActive(isActive = !this.isActive) {
+    this.isActive = isActive;
+    this.paintMeter()
   }
 
   clearPeak(i: number) {
