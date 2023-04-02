@@ -1,4 +1,4 @@
-import { PeakMeterConfig, defaultConfig } from "./config";
+import { PeakMeterConfig, defaultConfig } from './config';
 import {
   audioClipPath,
   createContainerDiv,
@@ -7,9 +7,9 @@ import {
   createBars,
   createPeakLabels,
 } from './markup';
-import { dbFromFloat } from "./utils";
-import peakSampleProcessor from "./peak-sample-processor.txt";
-import truePeakProcessor from "./true-peak-processor.txt";
+import { dbFromFloat } from './utils';
+import peakSampleProcessor from './peak-sample-processor.txt';
+import truePeakProcessor from './true-peak-processor.txt';
 
 export class WebAudioPeakMeter {
   channelCount: number;
@@ -24,10 +24,11 @@ export class WebAudioPeakMeter {
   tempPeaks: Array<number>;
   heldPeaks: Array<number>;
   peakHoldTimeouts: Array<number>;
+  animationRequestId?: number;
 
-  constructor(src:AudioNode, ele: HTMLElement, options = {}) {
+  constructor(src: AudioNode, ele: HTMLElement, options = {}) {
     this.srcNode = src;
-    this.config = Object.assign({...defaultConfig}, options);
+    this.config = Object.assign({ ...defaultConfig }, options);
     this.channelCount = src.channelCount;
     this.tempPeaks = new Array(this.channelCount).fill(0.0);
     this.heldPeaks = new Array(this.channelCount).fill(0.0);
@@ -38,7 +39,7 @@ export class WebAudioPeakMeter {
       this.peakLabels = createPeakLabels(this.channelElements, this.config);
       this.bars = createBars(this.channelElements, this.config);
       this.ticks = createTicks(this.parent, this.config);
-      this.parent.addEventListener('click', () => this.clearPeaks());
+      this.parent.addEventListener('click', this.clearPeaks.bind(this));
       this.paintMeter();
     }
     this.initNode();
@@ -47,19 +48,24 @@ export class WebAudioPeakMeter {
   async initNode() {
     const { audioMeterStandard } = this.config;
     try {
-      this.node = new AudioWorkletNode(this.srcNode.context, `${audioMeterStandard}-processor`, { parameterData: { foo: 5 }});
+      this.node = new AudioWorkletNode(this.srcNode.context, `${audioMeterStandard}-processor`, {
+        parameterData: {},
+      });
     } catch (err) {
-      const workletString = audioMeterStandard === 'true-peak' ? truePeakProcessor : peakSampleProcessor;
-      const blob = new Blob([workletString], {type: 'application/javascript'});
+      const workletString =
+        audioMeterStandard === 'true-peak' ? truePeakProcessor : peakSampleProcessor;
+      const blob = new Blob([workletString], { type: 'application/javascript' });
       const objectURL = URL.createObjectURL(blob);
       await this.srcNode.context.audioWorklet.addModule(objectURL);
-      this.node = new AudioWorkletNode(this.srcNode.context, `${audioMeterStandard}-processor`, { parameterData: { foo: 5 }});
+      this.node = new AudioWorkletNode(this.srcNode.context, `${audioMeterStandard}-processor`, {
+        parameterData: {},
+      });
     }
-    this.node.port.onmessage = (ev:MessageEvent) => this.handleNodePortMessage(ev);
+    this.node.port.onmessage = (ev: MessageEvent) => this.handleNodePortMessage(ev);
     this.srcNode.connect(this.node).connect(this.srcNode.context.destination);
   }
 
-  handleNodePortMessage(ev:MessageEvent) {
+  handleNodePortMessage(ev: MessageEvent) {
     if (ev.data.type === 'message') {
       console.log(ev.data.message);
     }
@@ -69,10 +75,9 @@ export class WebAudioPeakMeter {
         if (peaks.length > i) {
           this.tempPeaks[i] = peaks[i];
         } else {
-          this.tempPeaks[i] = 0.0
+          this.tempPeaks[i] = 0.0;
         }
       }
-      // this.tempPeaks = peaks;
       if (peaks.length < this.channelCount) {
         this.tempPeaks.fill(0.0, peaks.length);
       }
@@ -111,7 +116,7 @@ export class WebAudioPeakMeter {
         }
       });
     }
-    window.requestAnimationFrame(() => this.paintMeter());
+    this.animationRequestId = window.requestAnimationFrame(this.paintMeter.bind(this));
   }
 
   clearPeak(i: number) {
@@ -121,6 +126,28 @@ export class WebAudioPeakMeter {
   clearPeaks() {
     for (let i = 0; i < this.heldPeaks.length; i += 1) {
       this.clearPeak(i);
+    }
+  }
+
+  getPeaks() {
+    return {
+      current: this.tempPeaks,
+      maxes: this.heldPeaks,
+      currentDB: this.tempPeaks.map(dbFromFloat),
+      maxesDB: this.heldPeaks.map(dbFromFloat),
+    };
+  }
+
+  cleanup() {
+    if (this.node) {
+      this.node.disconnect();
+    }
+    if (this.parent) {
+      this.parent.removeEventListener('click', this.clearPeaks.bind(this));
+      if (this.animationRequestId !== undefined) {
+        window.cancelAnimationFrame(this.animationRequestId);
+      }
+      this.parent.remove();
     }
   }
 }

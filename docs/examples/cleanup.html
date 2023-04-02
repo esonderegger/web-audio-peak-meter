@@ -2,33 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Audio Demo</title>
+  <title>Dynamic creation and cleanup</title>
   <link href="/web-audio-peak-meter/docs.css" rel="stylesheet">
 </head>
 <body>
-<h1 id="audio-demo">Audio Demo</h1>
-<p>A basic HTML5 audio element with a horizontal meter</p>
+<h1 id="dynamic-creation-and-cleanup">Dynamic creation and cleanup</h1>
+<p>Sometimes You only need a peak meter for some of the time that the page is loaded. For those cases, a peak meter instance can by dynamically created and cleaned up.</p>
 
 <h2>Working Example</h2>
-<p>The web audio API context is <span id="ctx-status">loading</span>. <button id="ctx-button">Loading</button></p>
+<p>
+  The web audio API context is <span id="ctx-status">loading</span>.
+  <button id="ctx-button">Loading</button>
+</p>
 
 <audio id="the-audio" preload="metadata" crossorigin="anonymous" controls="controls">
   <source src="https://assets.rpy.xyz/testmedia/semper_fidelis.mp3" type="audio/mpeg" />
 </audio>
+<div>
+  <button id="meter-toggle">Create meter</button>
+</div>
 <div id="peak-meter" style="height: 80px"></div>
 
 <h2>HTML code</h2>
-<pre class="code-block"><code>&lt;p&gt;The web audio API context is &lt;span id=&quot;ctx-status&quot;&gt;loading&lt;/span&gt;. &lt;button id=&quot;ctx-button&quot;&gt;Loading&lt;/button&gt;&lt;/p&gt;
+<pre class="code-block"><code>&lt;p&gt;
+  The web audio API context is &lt;span id=&quot;ctx-status&quot;&gt;loading&lt;/span&gt;.
+  &lt;button id=&quot;ctx-button&quot;&gt;Loading&lt;/button&gt;
+&lt;/p&gt;
 
 &lt;audio id=&quot;the-audio&quot; preload=&quot;metadata&quot; crossorigin=&quot;anonymous&quot; controls=&quot;controls&quot;&gt;
   &lt;source src=&quot;https://assets.rpy.xyz/testmedia/semper_fidelis.mp3&quot; type=&quot;audio/mpeg&quot; /&gt;
 &lt;/audio&gt;
+&lt;div&gt;
+  &lt;button id=&quot;meter-toggle&quot;&gt;Create meter&lt;/button&gt;
+&lt;/div&gt;
 &lt;div id=&quot;peak-meter&quot; style=&quot;height: 80px&quot;&gt;&lt;/div&gt;
 </code></pre>
 <h2>Javascript code</h2>
 <pre class="code-block"><code>const audioCtx = new AudioContext();
 const audioElement = document.getElementById(&#039;the-audio&#039;);
 const meterElement = document.getElementById(&#039;peak-meter&#039;);
+const meterToggle = document.getElementById(&#039;meter-toggle&#039;);
 
 const sourceNode = audioCtx.createMediaElementSource(audioElement);
 sourceNode.connect(audioCtx.destination);
@@ -52,13 +65,25 @@ setInterval(() =&gt; {
   }
 }, 100);
 
-const test = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+let meterInstance = null;
+
+meterToggle.addEventListener(&#039;click&#039;, () =&gt; {
+  if (meterInstance) {
+    meterInstance.cleanup();
+    meterInstance = null;
+    meterToggle.innerText = &#039;Create meter&#039;;
+  } else {
+    meterInstance = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+    meterToggle.innerText = &#039;Delete meter&#039;;
+  }
+});
 </code></pre>
 <script src="/web-audio-peak-meter/web-audio-peak-meter-3.1.0.min.js"></script>
 <script>
 const audioCtx = new AudioContext();
 const audioElement = document.getElementById('the-audio');
 const meterElement = document.getElementById('peak-meter');
+const meterToggle = document.getElementById('meter-toggle');
 
 const sourceNode = audioCtx.createMediaElementSource(audioElement);
 sourceNode.connect(audioCtx.destination);
@@ -82,7 +107,18 @@ setInterval(() => {
   }
 }, 100);
 
-const test = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+let meterInstance = null;
+
+meterToggle.addEventListener('click', () => {
+  if (meterInstance) {
+    meterInstance.cleanup();
+    meterInstance = null;
+    meterToggle.innerText = 'Create meter';
+  } else {
+    meterInstance = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+    meterToggle.innerText = 'Delete meter';
+  }
+});
 
 </script>
 </body>

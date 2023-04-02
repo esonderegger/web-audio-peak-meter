@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Usage without a DOM node</title>
+  <link href="/web-audio-peak-meter/docs.css" rel="stylesheet">
+</head>
+<body>
+<h1 id="usage-without-a-dom-node">Usage without a DOM node</h1>
+<p>For users who desire the metering functionality of this library but not the visual presentation, it’s possible to create an instance without providing a DOM node as a second argument.</p>
+<p>To get the peaks at the current moment, as well as the maximum values for each channel, since the last time <code>clearPeaks()</code> was called, call the instance’s <code>getPeaks()</code> method.</p>
+
+<h2>Working Example</h2>
+<p>
+  The web audio API context is <span id="ctx-status">loading</span>.
+  <button id="ctx-button">Loading</button>
+</p>
+
+<audio id="the-audio" preload="metadata" crossorigin="anonymous" controls="controls">
+  <source src="https://assets.rpy.xyz/testmedia/semper_fidelis.mp3" type="audio/mpeg" />
+</audio>
+<div>
+  <button id="clear-peaks">Clear Peaks</button>
+  <button id="get-peaks">Get Peaks</button>
+</div>
+<ul>
+  <li>Current peaks (floating point): <span id="current-float"></span></li>
+  <li>Current peaks (decibels): <span id="current-db"></span></li>
+  <li>Channel maxes (floating point): <span id="maxes-float"></span></li>
+  <li>Channel maxes (decibels): <span id="maxes-db"></span></li>
+</ul>
+
+<h2>HTML code</h2>
+<pre class="code-block"><code>&lt;p&gt;
+  The web audio API context is &lt;span id=&quot;ctx-status&quot;&gt;loading&lt;/span&gt;.
+  &lt;button id=&quot;ctx-button&quot;&gt;Loading&lt;/button&gt;
+&lt;/p&gt;
+
+&lt;audio id=&quot;the-audio&quot; preload=&quot;metadata&quot; crossorigin=&quot;anonymous&quot; controls=&quot;controls&quot;&gt;
+  &lt;source src=&quot;https://assets.rpy.xyz/testmedia/semper_fidelis.mp3&quot; type=&quot;audio/mpeg&quot; /&gt;
+&lt;/audio&gt;
+&lt;div&gt;
+  &lt;button id=&quot;clear-peaks&quot;&gt;Clear Peaks&lt;/button&gt;
+  &lt;button id=&quot;get-peaks&quot;&gt;Get Peaks&lt;/button&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;Current peaks (floating point): &lt;span id=&quot;current-float&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;Current peaks (decibels): &lt;span id=&quot;current-db&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;Channel maxes (floating point): &lt;span id=&quot;maxes-float&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+  &lt;li&gt;Channel maxes (decibels): &lt;span id=&quot;maxes-db&quot;&gt;&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+<h2>Javascript code</h2>
+<pre class="code-block"><code>const audioCtx = new AudioContext();
+const audioElement = document.getElementById(&#039;the-audio&#039;);
+const clearPeaks = document.getElementById(&#039;clear-peaks&#039;);
+const getPeaks = document.getElementById(&#039;get-peaks&#039;);
+const currentFloat = document.getElementById(&#039;current-float&#039;);
+const currentDB = document.getElementById(&#039;current-db&#039;);
+const maxesFloat = document.getElementById(&#039;maxes-float&#039;);
+const maxesDB = document.getElementById(&#039;maxes-db&#039;);
+
+const sourceNode = audioCtx.createMediaElementSource(audioElement);
+sourceNode.connect(audioCtx.destination);
+
+const buttonElement = document.getElementById(&#039;ctx-button&#039;);
+buttonElement.addEventListener(&#039;click&#039;, () =&gt; {
+  if (audioCtx.state === &#039;suspended&#039;) {
+    audioCtx.resume();
+  } else {
+    audioCtx.suspend();
+  }
+});
+
+const ctxStatus = document.getElementById(&#039;ctx-status&#039;);
+setInterval(() =&gt; {
+  ctxStatus.innerText = audioCtx.state;
+  if (audioCtx.state === &#039;suspended&#039;) {
+    buttonElement.innerText = &#039;Resume&#039;;
+  } else {
+    buttonElement.innerText = &#039;Suspend&#039;;
+  }
+}, 100);
+
+const meterInstance = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode);
+
+clearPeaks.addEventListener(&#039;click&#039;, () =&gt; {
+  meterInstance.clearPeaks();
+});
+
+const displayFloatArray = (arr) =&gt; arr.map((val) =&gt; val.toFixed(2)).join(&#039;, &#039;);
+
+getPeaks.addEventListener(&#039;click&#039;, () =&gt; {
+  const peaks = meterInstance.getPeaks();
+  currentFloat.innerText = displayFloatArray(peaks.current);
+  currentDB.innerText = displayFloatArray(peaks.currentDB);
+  maxesFloat.innerText = displayFloatArray(peaks.maxes);
+  maxesDB.innerText = displayFloatArray(peaks.maxesDB);
+});
+</code></pre>
+<script src="/web-audio-peak-meter/web-audio-peak-meter-3.1.0.min.js"></script>
+<script>
+const audioCtx = new AudioContext();
+const audioElement = document.getElementById('the-audio');
+const clearPeaks = document.getElementById('clear-peaks');
+const getPeaks = document.getElementById('get-peaks');
+const currentFloat = document.getElementById('current-float');
+const currentDB = document.getElementById('current-db');
+const maxesFloat = document.getElementById('maxes-float');
+const maxesDB = document.getElementById('maxes-db');
+
+const sourceNode = audioCtx.createMediaElementSource(audioElement);
+sourceNode.connect(audioCtx.destination);
+
+const buttonElement = document.getElementById('ctx-button');
+buttonElement.addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  } else {
+    audioCtx.suspend();
+  }
+});
+
+const ctxStatus = document.getElementById('ctx-status');
+setInterval(() => {
+  ctxStatus.innerText = audioCtx.state;
+  if (audioCtx.state === 'suspended') {
+    buttonElement.innerText = 'Resume';
+  } else {
+    buttonElement.innerText = 'Suspend';
+  }
+}, 100);
+
+const meterInstance = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode);
+
+clearPeaks.addEventListener('click', () => {
+  meterInstance.clearPeaks();
+});
+
+const displayFloatArray = (arr) => arr.map((val) => val.toFixed(2)).join(', ');
+
+getPeaks.addEventListener('click', () => {
+  const peaks = meterInstance.getPeaks();
+  currentFloat.innerText = displayFloatArray(peaks.current);
+  currentDB.innerText = displayFloatArray(peaks.currentDB);
+  maxesFloat.innerText = displayFloatArray(peaks.maxes);
+  maxesDB.innerText = displayFloatArray(peaks.maxesDB);
+});
+
+</script>
+</body>
+</html>

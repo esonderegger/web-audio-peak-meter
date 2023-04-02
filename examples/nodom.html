@@ -1,0 +1,18 @@
+<p>
+  The web audio API context is <span id="ctx-status">loading</span>.
+  <button id="ctx-button">Loading</button>
+</p>
+
+<audio id="the-audio" preload="metadata" crossorigin="anonymous" controls="controls">
+  <source src="https://assets.rpy.xyz/testmedia/semper_fidelis.mp3" type="audio/mpeg" />
+</audio>
+<div>
+  <button id="clear-peaks">Clear Peaks</button>
+  <button id="get-peaks">Get Peaks</button>
+</div>
+<ul>
+  <li>Current peaks (floating point): <span id="current-float"></span></li>
+  <li>Current peaks (decibels): <span id="current-db"></span></li>
+  <li>Channel maxes (floating point): <span id="maxes-float"></span></li>
+  <li>Channel maxes (decibels): <span id="maxes-db"></span></li>
+</ul>
