@@ -8,6 +8,8 @@ Customizable peak meters, using the web audio API. It can measure peak or true p
 - [Single video element](https://esonderegger.github.io/web-audio-peak-meter/examples/video.html)
 - [An oscillator node](https://esonderegger.github.io/web-audio-peak-meter/examples/osc.html)
 - [Variations using configuration](https://esonderegger.github.io/web-audio-peak-meter/examples/variations.html)
+- [Dynamic creation and cleanup](https://esonderegger.github.io/web-audio-peak-meter/examples/cleanup.html)
+- [Usage without a DOM node](https://esonderegger.github.io/web-audio-peak-meter/examples/nodom.html)
 
 ## Usage (basic)
 
