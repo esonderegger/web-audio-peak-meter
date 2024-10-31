@@ -1,21 +1,24 @@
 const audioCtx = new AudioContext();
 
 const ctxStatus = document.getElementById('ctx-status');
-setInterval(() => {
+const buttonElement = document.getElementById('ctx-button');
+
+function updateAudioCtxStatus() {
   ctxStatus.innerText = audioCtx.state;
   if (audioCtx.state === 'suspended') {
     buttonElement.innerText = 'Resume';
   } else {
     buttonElement.innerText = 'Suspend';
   }
-}, 100);
+}
 
-const buttonElement = document.getElementById('ctx-button');
+setInterval(updateAudioCtxStatus, 1000);
+
 buttonElement.addEventListener('click', () => {
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+    audioCtx.resume().then(updateAudioCtxStatus);
   } else {
-    audioCtx.suspend();
+    audioCtx.suspend().then(updateAudioCtxStatus);
   }
 });
 
