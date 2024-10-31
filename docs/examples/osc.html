@@ -39,21 +39,24 @@
 <pre class="code-block"><code>const audioCtx = new AudioContext();
 
 const ctxStatus = document.getElementById(&#039;ctx-status&#039;);
-setInterval(() =&gt; {
+const buttonElement = document.getElementById(&#039;ctx-button&#039;);
+
+function updateAudioCtxStatus() {
   ctxStatus.innerText = audioCtx.state;
   if (audioCtx.state === &#039;suspended&#039;) {
     buttonElement.innerText = &#039;Resume&#039;;
   } else {
     buttonElement.innerText = &#039;Suspend&#039;;
   }
-}, 100);
+}
 
-const buttonElement = document.getElementById(&#039;ctx-button&#039;);
+setInterval(updateAudioCtxStatus, 1000);
+
 buttonElement.addEventListener(&#039;click&#039;, () =&gt; {
   if (audioCtx.state === &#039;suspended&#039;) {
-    audioCtx.resume();
+    audioCtx.resume().then(updateAudioCtxStatus);
   } else {
-    audioCtx.suspend();
+    audioCtx.suspend().then(updateAudioCtxStatus);
   }
 });
 
@@ -90,21 +93,24 @@ panningSlider.addEventListener(&#039;change&#039;, (evt) =&gt; {
 const audioCtx = new AudioContext();
 
 const ctxStatus = document.getElementById('ctx-status');
-setInterval(() => {
+const buttonElement = document.getElementById('ctx-button');
+
+function updateAudioCtxStatus() {
   ctxStatus.innerText = audioCtx.state;
   if (audioCtx.state === 'suspended') {
     buttonElement.innerText = 'Resume';
   } else {
     buttonElement.innerText = 'Suspend';
   }
-}, 100);
+}
 
-const buttonElement = document.getElementById('ctx-button');
+setInterval(updateAudioCtxStatus, 1000);
+
 buttonElement.addEventListener('click', () => {
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+    audioCtx.resume().then(updateAudioCtxStatus);
   } else {
-    audioCtx.suspend();
+    audioCtx.suspend().then(updateAudioCtxStatus);
   }
 });
 

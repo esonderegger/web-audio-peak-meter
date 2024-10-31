@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Video Demo</title>
+  <title>Pre-Fade Metering with Video Element</title>
   <link href="/web-audio-peak-meter/docs.css" rel="stylesheet">
 </head>
 <body>
-<h1 id="video-demo">Video Demo</h1>
-<p>A basic HTML5 video element with default meter settings</p>
+<h1 id="pre-fade-metering-with-video-element">Pre-Fade Metering with Video Element</h1>
+<p>Sometimes it is useful to display levels for an audio node, even if that level is getting modified somewhere downstream.</p>
 
 <h2>Working Example</h2>
 <p>The web audio API context is <span id="ctx-status">loading</span>. <button id="ctx-button">Loading</button></p>
@@ -16,6 +16,10 @@
     <source src="https://assets.rpy.xyz/testmedia/hoops.mp4" type="video/mp4">
     Sorry, your browser doesn't support embedded videos.
   </video>
+  <div>
+    <input type="range" id="gain" name="gain" min="0" max="1" value="0" step="0.05">
+    <label for="gain">Gain</label>
+  </div>
   <div id="peak-meter" style="height: 72px"></div>
 </div>
 <h2>HTML code</h2>
@@ -25,6 +29,10 @@
     &lt;source src=&quot;https://assets.rpy.xyz/testmedia/hoops.mp4&quot; type=&quot;video/mp4&quot;&gt;
     Sorry, your browser doesn&#039;t support embedded videos.
   &lt;/video&gt;
+  &lt;div&gt;
+    &lt;input type=&quot;range&quot; id=&quot;gain&quot; name=&quot;gain&quot; min=&quot;0&quot; max=&quot;1&quot; value=&quot;0&quot; step=&quot;0.05&quot;&gt;
+    &lt;label for=&quot;gain&quot;&gt;Gain&lt;/label&gt;
+  &lt;/div&gt;
   &lt;div id=&quot;peak-meter&quot; style=&quot;height: 72px&quot;&gt;&lt;/div&gt;
 &lt;/div&gt;</code></pre>
 <h2>Javascript code</h2>
@@ -55,8 +63,18 @@ buttonElement.addEventListener(&#039;click&#039;, () =&gt; {
 const videoElement = document.getElementById(&#039;the-video&#039;);
 const meterElement = document.getElementById(&#039;peak-meter&#039;);
 const sourceNode = audioCtx.createMediaElementSource(videoElement);
-sourceNode.connect(audioCtx.destination);
-const test = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+const gainNode = audioCtx.createGain();
+gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+sourceNode.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+
+const unused = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+
+const gainSlider = document.getElementById(&#039;gain&#039;);
+gainSlider.addEventListener(&#039;change&#039;, (evt) =&gt; {
+  gainNode.gain.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
 </code></pre>
 <script src="/web-audio-peak-meter/web-audio-peak-meter-3.1.0.min.js"></script>
 <script>
@@ -87,8 +105,18 @@ buttonElement.addEventListener('click', () => {
 const videoElement = document.getElementById('the-video');
 const meterElement = document.getElementById('peak-meter');
 const sourceNode = audioCtx.createMediaElementSource(videoElement);
-sourceNode.connect(audioCtx.destination);
-const test = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+const gainNode = audioCtx.createGain();
+gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+sourceNode.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+
+const unused = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+
+const gainSlider = document.getElementById('gain');
+gainSlider.addEventListener('change', (evt) => {
+  gainNode.gain.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
 
 </script>
 </body>

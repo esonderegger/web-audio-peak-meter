@@ -25,5 +25,15 @@ buttonElement.addEventListener('click', () => {
 const videoElement = document.getElementById('the-video');
 const meterElement = document.getElementById('peak-meter');
 const sourceNode = audioCtx.createMediaElementSource(videoElement);
-sourceNode.connect(audioCtx.destination);
-const test = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+const gainNode = audioCtx.createGain();
+gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+sourceNode.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+
+const unused = new webAudioPeakMeter.WebAudioPeakMeter(sourceNode, meterElement);
+
+const gainSlider = document.getElementById('gain');
+gainSlider.addEventListener('change', (evt) => {
+  gainNode.gain.setValueAtTime(evt.target.value, audioCtx.currentTime);
+});
